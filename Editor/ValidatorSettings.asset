@@ -36,8 +36,5 @@ MonoBehaviour:
   - Resources
   - Editor Default Resources
   - Gizmos
-  _conditionFormula:
-  - Condition01
-  - Condition02
-  - Condition03\Test
-  _conditionSelection: ffffffff0400000008000000000000000000000000000000000000000000000000000000000000000000000000000000
+  _conditionFormula: []
+  _conditionSelection: 000000000000000000000000000000000000000000000000000000000000000000000000

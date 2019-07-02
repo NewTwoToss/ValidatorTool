@@ -229,6 +229,7 @@ namespace TossValidator
         //==========================================================================================
         private void OnDestroy()
         {
+            AssetDatabase.SaveAssets();
             SaveValidatorStates();
         }
 
