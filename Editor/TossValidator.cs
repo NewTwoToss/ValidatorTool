@@ -164,6 +164,9 @@ namespace TossValidator
 
             InitializeValidator();
 
+            // TODO: Otestovat ?!?
+            SaveValidatorStates();
+
             var executeTimer = new Stopwatch();
 
             executeTimer.Start();
@@ -229,7 +232,6 @@ namespace TossValidator
         //==========================================================================================
         private void OnDestroy()
         {
-            AssetDatabase.SaveAssets();
             SaveValidatorStates();
         }
 
@@ -1637,6 +1639,7 @@ namespace TossValidator
         //==========================================================================================
         private static void SaveValidatorStates()
         {
+            AssetDatabase.SaveAssets();
             SaveFilter();
             SaveSettings();
         }
