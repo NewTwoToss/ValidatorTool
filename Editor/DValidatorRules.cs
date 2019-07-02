@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿// =================================================================================================
+//     Author:			Tomas "Toss" Szilagyi
+//     Date created:	05.04.2018
+// =================================================================================================
+
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TossValidator

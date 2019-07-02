@@ -28,9 +28,7 @@ MonoBehaviour:
   _rootFolderSounds: Sounds
   _rootFolderMaterials: Materials
   _rootFolderAnimations: Animations
-  _specialFolders:
-  - Documentation
-  - Scripts\Controllers
+  _specialFolders: []
   _ignoreFolders:
   - .git
   - Plugins
@@ -39,14 +37,7 @@ MonoBehaviour:
   - Editor Default Resources
   - Gizmos
   _conditionFormula:
-  - Dogs\*\TestTest22
-  - Dogs\*\TestTest22
-  - Dogs\*\TestTest333
-  - Dogs\*\TestTest1
-  - Dogs\*\TestTest444
-  - Dogs\*\TestTest
-  - Cats
-  - Dogs\*\TestTest333
-  - Dogs\*\TestTest333
-  - Dogs\*\TestTest333
-  _conditionSelection: ffffffffffffffff0000000013000000110000001100000011000000000000000000000000000000080000000000000008000000080000000800000008000000030000000000000000000000
+  - Condition01
+  - Condition02
+  - Condition03\Test
+  _conditionSelection: ffffffff0400000008000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -1,4 +1,9 @@
-﻿using System;
+﻿// =================================================================================================
+//     Author:			Tomas "Toss" Szilagyi
+//     Date created:	05.04.2018
+// =================================================================================================
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -80,10 +85,10 @@ namespace TossValidator
 
         private static Settings m_settings = new Settings
         {
-            _countDisplayErrors = 40,
-            _countSpecialFolders = 10,
-            _countIgnoreFolders = 10,
-            _countConditionRows = 10
+            _countDisplayErrors = 999,
+            _countSpecialFolders = 15,
+            _countIgnoreFolders = 15,
+            _countConditionRows = 15
         };
 
         private static GuiValue m_guiValue = new GuiValue
@@ -1583,27 +1588,26 @@ namespace TossValidator
             InitializeProjectRules();
 
             LoadValidatorStates();
-
-            //m_assetTypesForConditions = GetAssetTypesForConditions();
         }
 
         //==========================================================================================
         private static void InitializeProjectRules()
         {
             var guidValidatorSettings = AssetDatabase.FindAssets("ValidatorSettings");
-            var pathValidatorSettings = AssetDatabase.GUIDToAssetPath(guidValidatorSettings[0]);
 
-            if (guidValidatorSettings.Length != 1) return;
+            if (guidValidatorSettings.Length == 0) return;
+
+            var pathValidatorSettings = AssetDatabase.GUIDToAssetPath(guidValidatorSettings[0]);
 
             var pathImages = pathValidatorSettings.Replace("ValidatorSettings.asset", "Images/");
 
             InitializeIconsAndStyles(pathImages);
 
-/*            m_rules = (DValidatorRules) AssetDatabase.LoadAssetAtPath(
+            m_rules = (DValidatorRules) AssetDatabase.LoadAssetAtPath(
                 pathValidatorSettings,
-                typeof(DValidatorRules));*/
+                typeof(DValidatorRules));
 
-            m_rules = (DValidatorRules) EditorGUIUtility.Load(pathValidatorSettings);
+            //m_rules = (DValidatorRules) EditorGUIUtility.Load(pathValidatorSettings);
         }
 
         //==========================================================================================

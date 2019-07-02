@@ -1,4 +1,9 @@
-﻿using UnityEditor;
+﻿// =================================================================================================
+//     Author:			Tomas "Toss" Szilagyi
+//     Date created:	05.04.2018
+// =================================================================================================
+
+using UnityEditor;
 using UnityEngine;
 
 namespace TossValidator
