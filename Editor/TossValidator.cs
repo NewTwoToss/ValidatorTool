@@ -164,9 +164,6 @@ namespace TossValidator
 
             InitializeValidator();
 
-            // TODO: Otestovat ?!?
-            SaveValidatorStates();
-
             var executeTimer = new Stopwatch();
 
             executeTimer.Start();
@@ -727,8 +724,6 @@ namespace TossValidator
         //==========================================================================================
         private static void DrawValidator(float windowWidth)
         {
-            SaveValidatorStates();
-
             GUILayout.Space(50f);
 
             #region === FILTER PANEL ===============================================================
@@ -852,6 +847,7 @@ namespace TossValidator
                 GUILayout.Width(150),
                 GUILayout.Height(40)))
             {
+                SaveValidatorStates();
                 ControlProject();
             }
 
