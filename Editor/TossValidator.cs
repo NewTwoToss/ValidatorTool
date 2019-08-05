@@ -7,10 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace TossValidator
 {
@@ -111,7 +113,8 @@ namespace TossValidator
 
             _styleEvenRow = new GUIStyle(),
             _styleOddRow = new GUIStyle(),
-            _styleDynamicMarginLeft = new GUIStyle()
+            _styleDynamicMarginLeft = new GUIStyle(),
+            _styleExportButtonMarginLeft = new GUIStyle()
         };
 
         private static int m_countErrors;
@@ -528,12 +531,23 @@ namespace TossValidator
 
                     if (subFolders.Length == 0)
                     {
-                        SetErrorData(m_icon._errorNotValid,
-                            ErrorType.FolderNotContain,
-                            assetType,
-                            GetMessageConditionRow(i, m_rules._conditionFormula[i]),
-                            pathSectionOne,
-                            string.Empty);
+                        var guids = AssetDatabase.FindAssets(filter,
+                            new[] {pathSectionOne});
+
+                        if (guids.Length == 0)
+                        {
+                            SetErrorData(m_icon._errorNotContain,
+                                ErrorType.FolderNotContain,
+                                assetType,
+                                GetMessageMissingAsset(assetType),
+                                pathSectionOne.ModifyPathSeparators(),
+                                string.Empty);
+                        }
+                        else
+                        {
+                            var conditionPath = pathSectionOne.ModifyPathSeparators();
+                            conditionPaths.Add(conditionPath);
+                        }
                     }
                     else
                     {
@@ -729,7 +743,7 @@ namespace TossValidator
             #region === FILTER PANEL ===============================================================
 
             m_guiValue._styleDynamicMarginLeft.margin.top = 0;
-            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 840) / 2);
+            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 960) / 2);
 
             EditorGUILayout.BeginHorizontal(m_guiValue._styleDynamicMarginLeft,
                 GUILayout.Width(840), GUILayout.Height(40));
@@ -805,6 +819,14 @@ namespace TossValidator
                 GUILayout.Height(20));
             EditorGUILayout.EndVertical();
 
+            //--------------------------------------------------------------------------------------
+            EditorGUILayout.BeginVertical();
+            m_filter._controlConditions = EditorGUILayout.ToggleLeft("Conditions",
+                m_filter._controlConditions,
+                GUILayout.Width(120),
+                GUILayout.Height(18));
+            EditorGUILayout.EndVertical();
+
             // Button All - select all          
             EditorGUILayout.BeginVertical();
             if (GUILayout.Button(new GUIContent("All", "Select All"),
@@ -821,6 +843,8 @@ namespace TossValidator
                 m_filter._controlSounds = true;
                 m_filter._controlMaterials = true;
                 m_filter._controlAnimations = true;
+
+                m_filter._controlConditions = true;
             }
 
             // Button None - deselect all
@@ -838,6 +862,8 @@ namespace TossValidator
                 m_filter._controlSounds = false;
                 m_filter._controlMaterials = false;
                 m_filter._controlAnimations = false;
+
+                m_filter._controlConditions = false;
             }
 
             EditorGUILayout.EndVertical();
@@ -863,13 +889,13 @@ namespace TossValidator
             #region === MIDDLE PANEL ===============================================================
 
             m_guiValue._styleDynamicMarginLeft.margin.top = 0;
-            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 840) / 2);
+            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 960) / 2);
 
             EditorGUILayout.BeginHorizontal(m_guiValue._styleDynamicMarginLeft,
-                GUILayout.Width(800));
+                GUILayout.Width(960));
 
             //--------------------------------------------------------------------------------------
-            EditorGUILayout.BeginHorizontal(GUILayout.Width(240));
+            EditorGUILayout.BeginHorizontal(GUILayout.Width(304));
             EditorGUILayout.HelpBox("TIME OF CONTROL: " + m_controlTime + " ms",
                 MessageType.Info,
                 true);
@@ -902,12 +928,23 @@ namespace TossValidator
             EditorGUILayout.EndHorizontal();
 
             //--------------------------------------------------------------------------------------
-            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox, GUILayout.Width(240));
-            EditorGUI.BeginDisabledGroup(EditorApplication.isCompiling);
-            m_filter._controlConditions = EditorGUILayout.ToggleLeft("Conditions",
-                m_filter._controlConditions,
-                GUILayout.Width(236),
-                GUILayout.Height(18));
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox, GUILayout.Width(304));
+            EditorGUI.BeginDisabledGroup(EditorApplication.isCompiling || Errors.Count == 0);
+
+            EditorGUILayout.BeginHorizontal(m_guiValue._styleExportButtonMarginLeft,
+                GUILayout.Width(200),
+                GUILayout.Height(26));
+
+            if (GUILayout.Button(
+                new GUIContent("Export results to file", "Export results (errors) to CSV file"),
+                GUILayout.Width(200),
+                GUILayout.Height(26)))
+            {
+                ExportErrorsToFile();
+            }
+
+            EditorGUILayout.EndHorizontal();
+
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
 
@@ -1568,7 +1605,7 @@ namespace TossValidator
             {
                 GUILayout.Label("Created by: Toss");
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Version: 1.0");
+                GUILayout.Label("Version: 1.5");
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -1630,6 +1667,7 @@ namespace TossValidator
             styleEvenRow.padding = new RectOffset(10, 6, 6, 6);
 
             m_guiValue._styleOddRow.padding = new RectOffset(10, 6, 6, 6);
+            m_guiValue._styleExportButtonMarginLeft.margin.left = 48;
         }
 
         //==========================================================================================
@@ -1697,6 +1735,47 @@ namespace TossValidator
             m_settings._countSpecialFolders = EditorPrefs.GetInt("countSpecialFolders", 10);
             m_settings._countIgnoreFolders = EditorPrefs.GetInt("countIgnoreFolders", 10);
             m_settings._countConditionRows = EditorPrefs.GetInt("countConditionRows", 10);
+        }
+
+        //==========================================================================================
+        private static void ExportErrorsToFile()
+        {
+            if (Errors.Count == 0) return;
+
+            try
+            {
+                using (var file = new StreamWriter("TestFile2.csv", true))
+                {
+                    const char FILE_SEPARATOR = ',';
+
+                    var sb = new StringBuilder();
+                    var countErrors = Errors.Count;
+
+                    // CSV file titles
+                    sb.Append("ERROR NAME, ASSET TYPE, ASSET NAME, ASSET PATH");
+                    file.WriteLine(sb);
+                    sb.Clear();
+
+                    for (var i = 0; i < countErrors; i++)
+                    {
+                        sb.Append(Errors[i]._errorName);
+                        sb.Append(FILE_SEPARATOR);
+                        sb.Append(Errors[i]._assetType);
+                        sb.Append(FILE_SEPARATOR);
+                        sb.Append(Errors[i]._assetName);
+                        sb.Append(FILE_SEPARATOR);
+                        sb.Append(Errors[i]._assetPath);
+
+                        file.WriteLine(sb);
+
+                        sb.Clear();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException("[TossValidator] Export file error: ", e);
+            }
         }
 
         //==========================================================================================
@@ -2191,6 +2270,7 @@ namespace TossValidator
             public GUIStyle _styleEvenRow;
             public GUIStyle _styleOddRow;
             public GUIStyle _styleDynamicMarginLeft;
+            public GUIStyle _styleExportButtonMarginLeft;
 
             public Vector2 _scrollPosValidator;
             public Vector2 _scrollPosRules;
