@@ -7,12 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace TossValidator
 {
@@ -20,6 +18,7 @@ namespace TossValidator
     {
         private const string ASSET_PATH_SEPARATOR = "\\";
         private const string UNITY_PACKAGES = "Packages";
+        private const string EXPORT_FILE_PATH = "Assets\\TossValidator_Results.csv";
         private const int MAX_COUNT_DISPLAY_ERRORS = 9999;
         private const int MAX_COUNT_SPECIAL_FOLDERS = 30;
         private const int MAX_COUNT_IGNORE_FOLDERS = 30;
@@ -919,8 +918,9 @@ namespace TossValidator
                 }
                 else
                 {
-                    errorMessage = "ERRORS IN ASSETS FOLDER: " + m_settings._countDisplayErrors +
-                                   "+";
+                    errorMessage = "ERRORS IN ASSETS FOLDER: ";
+                    errorMessage += m_settings._countDisplayErrors;
+                    errorMessage += "+";
                     EditorGUILayout.HelpBox(errorMessage, MessageType.Error, true);
                 }
             }
@@ -936,7 +936,7 @@ namespace TossValidator
                 GUILayout.Height(26));
 
             if (GUILayout.Button(
-                new GUIContent("Export results to file", "Export results (errors) to CSV file"),
+                new GUIContent("Export results to CSV file", "Export results (errors) to CSV file"),
                 GUILayout.Width(200),
                 GUILayout.Height(26)))
             {
@@ -1744,7 +1744,7 @@ namespace TossValidator
 
             try
             {
-                using (var file = new StreamWriter("TestFile2.csv", true))
+                using (var file = new StreamWriter(EXPORT_FILE_PATH, false))
                 {
                     const char FILE_SEPARATOR = ',';
 
@@ -1770,11 +1770,22 @@ namespace TossValidator
 
                         sb.Clear();
                     }
+
+                    file.Close();
+
+                    sb.Append("[TossValidator]");
+                    sb.Append(" Export to CSV file was successful! --->");
+                    sb.Append(" Path: ");
+                    sb.Append(EXPORT_FILE_PATH);
+
+                    ConsoleDebugLog(sb.ToString());
+
+                    sb.Clear();
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new ApplicationException("[TossValidator] Export file error: ", e);
+                ConsoleDebugLogError("[TossValidator] Export Error: " + ex.Message);
             }
         }
 
@@ -2154,7 +2165,7 @@ namespace TossValidator
             sb.Append(texturePath);
             sb.Append(textureName);
             sb.Append(".png");
-            //return (Texture2D) AssetDatabase.LoadAssetAtPath(sb.ToString(), typeof(Texture2D));
+
             return (Texture2D) EditorGUIUtility.Load(sb.ToString());
         }
 
@@ -2296,12 +2307,24 @@ namespace TossValidator
         {
             var sb = new StringBuilder();
             sb.Append("<b>");
-            sb.Append("<color=#003399>");
+            sb.Append("<color=#002C83>");
             sb.Append(message);
             sb.Append("</color>");
             sb.Append("</b>");
 
             UnityEngine.Debug.Log(sb);
+        }
+
+        private static void ConsoleDebugLogError(string message)
+        {
+            var sb = new StringBuilder();
+            sb.Append("<b>");
+            sb.Append("<color=#7B0011>");
+            sb.Append(message);
+            sb.Append("</color>");
+            sb.Append("</b>");
+
+            UnityEngine.Debug.LogError(sb);
         }
 
         //==========================================================================================
