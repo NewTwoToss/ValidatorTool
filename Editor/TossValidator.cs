@@ -1,5 +1,5 @@
 ﻿// =================================================================================================
-//     Author:			Tomas "Toss" Szilagyi
+//     Author:			Tomas "SkyToss" Szilagyi
 //     Date created:	05.04.2018
 // =================================================================================================
 
@@ -11,7 +11,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using static TossValidator.TossValidator.ErrorType;
 
 namespace TossValidator
 {
@@ -252,7 +251,7 @@ namespace TossValidator
                 var folderPath = GetPath(splitFolderPath);
 
                 SetErrorData(_icon.errorSpecialFolder,
-                    SpecialFolderNotExists,
+                    ErrorType.SpecialFolderNotExists,
                     AssetType.Folder,
                     folderName,
                     folderPath,
@@ -288,7 +287,7 @@ namespace TossValidator
                 var folderPath = GetPath(splitFolderPath);
 
                 SetErrorData(_icon.errorWrongName,
-                    FolderNameError,
+                    ErrorType.FolderNameError,
                     AssetType.Folder,
                     folderName,
                     folderPath,
@@ -314,8 +313,8 @@ namespace TossValidator
                 FILTER_PREFAB,
                 _rules,
                 conditionPaths,
-                PrefabLocationError,
-                PrefabNameError);
+                ErrorType.PrefabLocationError,
+                ErrorType.PrefabNameError);
 
             conditionPaths.Clear();
         }
@@ -336,8 +335,8 @@ namespace TossValidator
                 FILTER_SCRIPT,
                 _rules,
                 conditionPaths,
-                ScriptLocationError,
-                ScriptNameError);
+                ErrorType.ScriptLocationError,
+                ErrorType.ScriptNameError);
 
             conditionPaths.Clear();
         }
@@ -358,8 +357,8 @@ namespace TossValidator
                 FILTER_TEXTURE,
                 _rules,
                 conditionPaths,
-                TextureLocationError,
-                TextureNameError);
+                ErrorType.TextureLocationError,
+                ErrorType.TextureNameError);
 
             conditionPaths.Clear();
         }
@@ -380,8 +379,8 @@ namespace TossValidator
                 FILTER_SCENE,
                 _rules,
                 conditionPaths,
-                SceneLocationError,
-                SceneNameError);
+                ErrorType.SceneLocationError,
+                ErrorType.SceneNameError);
 
             conditionPaths.Clear();
         }
@@ -402,8 +401,8 @@ namespace TossValidator
                 FILTER_AUDIO_CLIP,
                 _rules,
                 conditionPaths,
-                SoundLocationError,
-                SoundNameError);
+                ErrorType.SoundLocationError,
+                ErrorType.SoundNameError);
 
             conditionPaths.Clear();
         }
@@ -424,8 +423,8 @@ namespace TossValidator
                 FILTER_MODEL,
                 _rules,
                 conditionPaths,
-                ModelLocationError,
-                ModelNameError);
+                ErrorType.ModelLocationError,
+                ErrorType.ModelNameError);
 
             conditionPaths.Clear();
         }
@@ -446,8 +445,8 @@ namespace TossValidator
                 FILTER_MATERIAL,
                 _rules,
                 conditionPaths,
-                MaterialLocationError,
-                MaterialNameError);
+                ErrorType.MaterialLocationError,
+                ErrorType.MaterialNameError);
 
             conditionPaths.Clear();
         }
@@ -468,8 +467,8 @@ namespace TossValidator
                 FILTER_ANIMATION,
                 _rules,
                 conditionPaths,
-                AnimationLocationError,
-                AnimationNameError);
+                ErrorType.AnimationLocationError,
+                ErrorType.AnimationNameError);
 
             conditionPaths.Clear();
         }
@@ -519,7 +518,7 @@ namespace TossValidator
                         if (guids.Length == 0)
                         {
                             SetErrorData(_icon.errorNotContain,
-                                FolderNotContain,
+                                ErrorType.FolderNotContain,
                                 assetType,
                                 GetMessageMissingAsset(assetType),
                                 pathSectionOne.ModifyPathSeparators(),
@@ -546,7 +545,7 @@ namespace TossValidator
                                 if (guids.Length == 0)
                                 {
                                     SetErrorData(_icon.errorNotContain,
-                                        FolderNotContain,
+                                        ErrorType.FolderNotContain,
                                         assetType,
                                         GetMessageMissingAsset(assetType),
                                         parentFolderPath.ModifyPathSeparators(),
@@ -561,7 +560,7 @@ namespace TossValidator
                             else
                             {
                                 SetErrorData(_icon.errorNotValid,
-                                    FolderNotValid,
+                                    ErrorType.FolderNotValid,
                                     AssetType.Folder,
                                     GetMessageConditionRow(i, _rules._conditionFormula[i]),
                                     parentFolderPath.ModifyPathSeparators(),
@@ -573,7 +572,7 @@ namespace TossValidator
                 else
                 {
                     SetErrorData(_icon.errorNotValid,
-                        FolderNotValid,
+                        ErrorType.FolderNotValid,
                         AssetType.Folder,
                         GetMessageConditionRow(i, _rules._conditionFormula[i]),
                         pathSectionOne,
@@ -1434,7 +1433,8 @@ namespace TossValidator
 
             EditorGUI.BeginDisabledGroup(EditorApplication.isCompiling);
 
-            if (errorType == SpecialFolderNotExists || errorType == FolderNotValid)
+            if (errorType == ErrorType.SpecialFolderNotExists
+                || errorType == ErrorType.FolderNotValid)
             {
                 GUILayout.Box(Errors[index].errorIcon,
                     rowStyle,
@@ -1450,29 +1450,29 @@ namespace TossValidator
                 {
                     switch (errorType)
                     {
-                        case FolderNameError:
-                        case PrefabNameError:
-                        case PrefabLocationError:
-                        case ScriptNameError:
-                        case ScriptLocationError:
-                        case TextureNameError:
-                        case TextureLocationError:
-                        case SceneNameError:
-                        case SceneLocationError:
-                        case SoundNameError:
-                        case SoundLocationError:
-                        case ModelNameError:
-                        case ModelLocationError:
-                        case MaterialNameError:
-                        case MaterialLocationError:
-                        case AnimationNameError:
-                        case AnimationLocationError:
+                        case ErrorType.FolderNameError:
+                        case ErrorType.PrefabNameError:
+                        case ErrorType.PrefabLocationError:
+                        case ErrorType.ScriptNameError:
+                        case ErrorType.ScriptLocationError:
+                        case ErrorType.TextureNameError:
+                        case ErrorType.TextureLocationError:
+                        case ErrorType.SceneNameError:
+                        case ErrorType.SceneLocationError:
+                        case ErrorType.SoundNameError:
+                        case ErrorType.SoundLocationError:
+                        case ErrorType.ModelNameError:
+                        case ErrorType.ModelLocationError:
+                        case ErrorType.MaterialNameError:
+                        case ErrorType.MaterialLocationError:
+                        case ErrorType.AnimationNameError:
+                        case ErrorType.AnimationLocationError:
                         {
                             var path = GetFormattedAssetPath(assetPath, assetName);
                             SelectAsset(path);
                             break;
                         }
-                        case FolderNotContain:
+                        case ErrorType.FolderNotContain:
                         {
                             SelectAsset(assetPath);
                             break;
@@ -1506,50 +1506,50 @@ namespace TossValidator
 
             switch (errorType)
             {
-                case SpecialFolderNotExists:
+                case ErrorType.SpecialFolderNotExists:
 
                     EditorGUILayout.HelpBox("Create Folder(s) in the Project Window",
                         MessageType.Info,
                         false);
 
                     break;
-                case FolderNameError:
-                case PrefabNameError:
-                case ScriptNameError:
-                case TextureNameError:
-                case SceneNameError:
-                case SoundNameError:
-                case ModelNameError:
-                case MaterialNameError:
-                case AnimationNameError:
+                case ErrorType.FolderNameError:
+                case ErrorType.PrefabNameError:
+                case ErrorType.ScriptNameError:
+                case ErrorType.TextureNameError:
+                case ErrorType.SceneNameError:
+                case ErrorType.SoundNameError:
+                case ErrorType.ModelNameError:
+                case ErrorType.MaterialNameError:
+                case ErrorType.AnimationNameError:
 
                     EditorGUILayout.HelpBox("Correct: " + correctPattern,
                         MessageType.Info,
                         false);
 
                     break;
-                case PrefabLocationError:
-                case ScriptLocationError:
-                case TextureLocationError:
-                case SceneLocationError:
-                case SoundLocationError:
-                case ModelLocationError:
-                case MaterialLocationError:
-                case AnimationLocationError:
+                case ErrorType.PrefabLocationError:
+                case ErrorType.ScriptLocationError:
+                case ErrorType.TextureLocationError:
+                case ErrorType.SceneLocationError:
+                case ErrorType.SoundLocationError:
+                case ErrorType.ModelLocationError:
+                case ErrorType.MaterialLocationError:
+                case ErrorType.AnimationLocationError:
 
                     EditorGUILayout.HelpBox("Check Root folders or Conditions",
                         MessageType.Info,
                         false);
 
                     break;
-                case FolderNotContain:
+                case ErrorType.FolderNotContain:
 
                     EditorGUILayout.HelpBox(GetHelpBoxText(assetType),
                         MessageType.Info,
                         false);
 
                     break;
-                case FolderNotValid:
+                case ErrorType.FolderNotValid:
 
                     EditorGUILayout.HelpBox("Create Folder(s) in the Project Window",
                         MessageType.Info,
@@ -1814,30 +1814,30 @@ namespace TossValidator
         {
             switch (errorType)
             {
-                case FolderNameError:
-                case ScriptNameError:
-                case PrefabNameError:
-                case SceneNameError:
-                case TextureNameError:
-                case SoundNameError:
-                case ModelNameError:
-                case MaterialNameError:
-                case AnimationNameError:
+                case ErrorType.FolderNameError:
+                case ErrorType.ScriptNameError:
+                case ErrorType.PrefabNameError:
+                case ErrorType.SceneNameError:
+                case ErrorType.TextureNameError:
+                case ErrorType.SoundNameError:
+                case ErrorType.ModelNameError:
+                case ErrorType.MaterialNameError:
+                case ErrorType.AnimationNameError:
                     return "WRONG NAME";
-                case PrefabLocationError:
-                case ScriptLocationError:
-                case SceneLocationError:
-                case TextureLocationError:
-                case SoundLocationError:
-                case ModelLocationError:
-                case MaterialLocationError:
-                case AnimationLocationError:
+                case ErrorType.PrefabLocationError:
+                case ErrorType.ScriptLocationError:
+                case ErrorType.SceneLocationError:
+                case ErrorType.TextureLocationError:
+                case ErrorType.SoundLocationError:
+                case ErrorType.ModelLocationError:
+                case ErrorType.MaterialLocationError:
+                case ErrorType.AnimationLocationError:
                     return "WRONG LOCATION";
-                case SpecialFolderNotExists:
+                case ErrorType.SpecialFolderNotExists:
                     return "NOT EXISTS";
-                case FolderNotContain:
+                case ErrorType.FolderNotContain:
                     return "NOT CONTAIN";
-                case FolderNotValid:
+                case ErrorType.FolderNotValid:
                     return "NOT VALID";
                 default:
                     return "ERROR";
@@ -2304,7 +2304,7 @@ namespace TossValidator
             TossValidator.ErrorType errorType)
         {
             if (assetType == TossValidator.AssetType.Folder
-                && errorType == FolderNotContain)
+                && errorType == TossValidator.ErrorType.FolderNotContain)
             {
                 return input + "\\ [Missing Folder(s)]";
             }
