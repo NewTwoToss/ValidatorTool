@@ -18,7 +18,7 @@ namespace TossValidator
     {
         private const string ASSET_PATH_SEPARATOR = "\\";
         private const string UNITY_PACKAGES = "Packages";
-        private const string EXPORT_FILE_PATH = "Assets\\TossValidator_Results.csv";
+        private const string EXPORT_FILE_PATH = "Assets\\UnityValidator_Results.csv";
         private const int MAX_COUNT_DISPLAY_ERRORS = 9999;
         private const int MAX_COUNT_SPECIAL_FOLDERS = 30;
         private const int MAX_COUNT_IGNORE_FOLDERS = 30;
@@ -696,7 +696,7 @@ namespace TossValidator
 
 #region [DRAW METHODS]
 
-        [MenuItem("Tools/Toss Validator")]
+        [MenuItem("Tools/Validator")]
         private static void UnityMenuTossValidator()
         {
             InitializeValidator();
@@ -708,8 +708,8 @@ namespace TossValidator
             _mainWindow = (TossValidator) GetWindow(typeof(TossValidator));
             _mainWindow.minSize = new Vector2(1024, 400);
             _mainWindow.titleContent.image = _icon.editorWindow;
-            _mainWindow.titleContent.text = "Toss Validator";
-            _mainWindow.titleContent.tooltip = "Toss Validator for Unity projects";
+            _mainWindow.titleContent.text = "Validator";
+            _mainWindow.titleContent.tooltip = "Tool for controlling assets";
             _mainWindow.Show();
         }
 
@@ -1569,7 +1569,7 @@ namespace TossValidator
             {
                 GUILayout.Label("Created by: SkyToss");
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Version: 1.5");
+                GUILayout.Label("Version: 1.6");
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -1725,7 +1725,7 @@ namespace TossValidator
 
                     file.Close();
 
-                    sb.Append("[TossValidator]");
+                    sb.Append("[Validator]");
                     sb.Append(" Export to CSV file was successful! --->");
                     sb.Append(" Path: ");
                     sb.Append(EXPORT_FILE_PATH);
@@ -1737,7 +1737,7 @@ namespace TossValidator
             }
             catch (Exception ex)
             {
-                ConsoleDebugLogError("[TossValidator] Export Error: " + ex.Message);
+                ConsoleDebugLogError("[Validator] Export Error: " + ex.Message);
             }
         }
 
@@ -2226,7 +2226,7 @@ namespace TossValidator
         {
             var sb = new StringBuilder();
             sb.Append("<b>");
-            sb.Append("<color=#002C83>");
+            sb.Append("<color=#79A6FF>");
             sb.Append(message);
             sb.Append("</color>");
             sb.Append("</b>");
