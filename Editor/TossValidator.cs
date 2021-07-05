@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using static TossValidator.TossValidator.ErrorType;
 
 namespace TossValidator
 {
@@ -24,11 +25,11 @@ namespace TossValidator
         private const int MAX_COUNT_IGNORE_FOLDERS = 30;
         private const int MAX_COUNT_CONDITION_ROWS = 40;
 
-        #region === PRIVATE VARIABLES ==============================================================
+#region [PRIVATE]
 
-        private static TossValidator m_mainWindow;
+        private static TossValidator _mainWindow;
 
-        private readonly string[] m_toolbarTitles =
+        private readonly string[] _toolbarTitles =
         {
             "Validator",
             "Rules",
@@ -48,7 +49,7 @@ namespace TossValidator
             "Animation"
         };
 
-        private static DValidatorRules m_rules;
+        private static DValidatorRules _rules;
 
         private static readonly List<Error> Errors = new List<Error>();
 
@@ -68,60 +69,59 @@ namespace TossValidator
             "Example_Of_Naming"
         };
 
-        private static Icon m_icon;
+        private static Icon _icon;
 
-        private static Filter m_filter = new Filter
+        private static Filter _filter = new Filter
         {
-            _controlSpecialFolders = true,
-            _controlFolders = true,
-            _controlPrefabs = true,
-            _controlScripts = true,
-            _controlTextures = true,
-            _controlScenes = true,
-            _controlGraphics3D = true,
-            _controlSounds = true,
-            _controlMaterials = true,
-            _controlAnimations = true
+            controlSpecialFolders = true,
+            controlFolders = true,
+            controlPrefabs = true,
+            controlScripts = true,
+            controlTextures = true,
+            controlScenes = true,
+            controlGraphics3D = true,
+            controlSounds = true,
+            controlMaterials = true,
+            controlAnimations = true
         };
 
-        private static Settings m_settings = new Settings
+        private static Settings _settings = new Settings
         {
-            _countDisplayErrors = 999,
-            _countSpecialFolders = 15,
-            _countIgnoreFolders = 15,
-            _countConditionRows = 15
+            countDisplayErrors = 999,
+            countSpecialFolders = 15,
+            countIgnoreFolders = 15,
+            countConditionRows = 15
         };
 
-        private static GuiValue m_guiValue = new GuiValue
+        private static GuiValue _guiValue = new GuiValue
         {
-            _foldoutPatterns = true,
-            _titlePatterns = "PATTERNS OF NAMING",
-            _foldoutRootFolders = true,
-            _titleRootFolders = "ROOT FOLDERS",
-            _foldoutSpecialFolders = true,
-            _titleSpecialFolders = "SPECIAL FOLDERS",
-            _foldoutIgnoreFolders = true,
-            _titleIgnoreFolders = "IGNORE FOLDERS",
+            foldoutPatterns = true,
+            titlePatterns = "PATTERNS OF NAMING",
+            foldoutRootFolders = true,
+            titleRootFolders = "ROOT FOLDERS",
+            foldoutSpecialFolders = true,
+            titleSpecialFolders = "SPECIAL FOLDERS",
+            foldoutIgnoreFolders = true,
+            titleIgnoreFolders = "IGNORE FOLDERS",
 
-            _labelSpecialFolder = GetFormattedLabel("Path: Assets\\"),
-            _labelIgnoreFolder = GetFormattedLabel("Folder name:"),
+            labelSpecialFolder = GetFormattedLabel("Path: Assets\\"),
+            labelIgnoreFolder = GetFormattedLabel("Folder name:"),
 
-            _addButtonColor = new Color(0.5f, 0.8f, 1.0f),
-            _deleteButtonColor = new Color(1.0f, 0.4f, 0.4f),
-            _duplicateButtonColor = new Color(1.0f, 1.0f, 0.2f),
+            addButtonColor = new Color(0.5f, 0.8f, 1.0f),
+            deleteButtonColor = new Color(1.0f, 0.4f, 0.4f),
+            duplicateButtonColor = new Color(1.0f, 1.0f, 0.2f),
 
-            _styleEvenRow = new GUIStyle(),
-            _styleOddRow = new GUIStyle(),
-            _styleDynamicMarginLeft = new GUIStyle(),
-            _styleExportButtonMarginLeft = new GUIStyle()
+            styleEvenRow = new GUIStyle(),
+            styleOddRow = new GUIStyle(),
+            styleDynamicMarginLeft = new GUIStyle(),
+            styleExportButtonMarginLeft = new GUIStyle()
         };
 
-        private static int m_countErrors;
-        private static long m_controlTime;
+        private static int _countErrors;
+        private static long _controlTime;
 
-        #endregion
+#endregion
 
-        //==========================================================================================
         [InitializeOnLoadMethod]
         public static void OnProjectLoadedInEditor()
         {
@@ -129,20 +129,19 @@ namespace TossValidator
             InitializeValidator();
         }
 
-        //==========================================================================================
         private void OnGUI()
         {
-            m_guiValue._editorActualWidth = EditorGUIUtility.currentViewWidth;
+            _guiValue.editorActualWidth = EditorGUIUtility.currentViewWidth;
 
-            m_guiValue._indexToolbarSelected = GUI.Toolbar(
-                new Rect((m_guiValue._editorActualWidth - 700) / 2, 10, 700, 30),
-                m_guiValue._indexToolbarSelected,
-                m_toolbarTitles);
+            _guiValue.indexToolbarSelected = GUI.Toolbar(
+                new Rect((_guiValue.editorActualWidth - 700) / 2, 10, 700, 30),
+                _guiValue.indexToolbarSelected,
+                _toolbarTitles);
 
-            switch (m_guiValue._indexToolbarSelected)
+            switch (_guiValue.indexToolbarSelected)
             {
                 case 0:
-                    DrawValidator(m_guiValue._editorActualWidth);
+                    DrawValidator(_guiValue.editorActualWidth);
                     break;
                 case 1:
                     DrawRules();
@@ -151,15 +150,14 @@ namespace TossValidator
                     DrawConditions();
                     break;
                 case 3:
-                    DrawSettings(m_guiValue._editorActualWidth);
+                    DrawSettings(_guiValue.editorActualWidth);
                     break;
                 default:
-                    DrawValidator(m_guiValue._editorActualWidth);
+                    DrawValidator(_guiValue.editorActualWidth);
                     break;
             }
         }
 
-        //==========================================================================================
         private static void ControlProject()
         {
             //ConsoleDebugLog("[TOSS VALIDATOR] --> ControlProject()");
@@ -173,77 +171,72 @@ namespace TossValidator
 
             ResetErrorData();
 
-            if (m_filter._controlSpecialFolders && IsPossibilityDisplayErrors())
+            if (_filter.controlSpecialFolders && IsPossibilityDisplayErrors())
             {
                 ControlSpecialFolders();
             }
 
-            if (m_filter._controlFolders && IsPossibilityDisplayErrors())
+            if (_filter.controlFolders && IsPossibilityDisplayErrors())
             {
                 ControlFolders();
             }
 
-            if (m_filter._controlPrefabs && IsPossibilityDisplayErrors())
+            if (_filter.controlPrefabs && IsPossibilityDisplayErrors())
             {
                 ControlPrefabs();
             }
 
-            if (m_filter._controlScripts && IsPossibilityDisplayErrors())
+            if (_filter.controlScripts && IsPossibilityDisplayErrors())
             {
                 ControlScripts();
             }
 
-            if (m_filter._controlTextures && IsPossibilityDisplayErrors())
+            if (_filter.controlTextures && IsPossibilityDisplayErrors())
             {
                 ControlTextures();
             }
 
-            if (m_filter._controlScenes && IsPossibilityDisplayErrors())
+            if (_filter.controlScenes && IsPossibilityDisplayErrors())
             {
                 ControlScenes();
             }
 
-            if (m_filter._controlGraphics3D && IsPossibilityDisplayErrors())
+            if (_filter.controlGraphics3D && IsPossibilityDisplayErrors())
             {
                 ControlModels();
             }
 
-            if (m_filter._controlSounds && IsPossibilityDisplayErrors())
+            if (_filter.controlSounds && IsPossibilityDisplayErrors())
             {
                 ControlSounds();
             }
 
-            if (m_filter._controlMaterials && IsPossibilityDisplayErrors())
+            if (_filter.controlMaterials && IsPossibilityDisplayErrors())
             {
                 ControlMaterials();
             }
 
-            if (m_filter._controlAnimations && IsPossibilityDisplayErrors())
+            if (_filter.controlAnimations && IsPossibilityDisplayErrors())
             {
                 ControlAnimations();
             }
 
             //--- STOP CONTROL ---------------------------------------------------------------------
             executeTimer.Stop();
-            m_controlTime = executeTimer.ElapsedMilliseconds;
+            _controlTime = executeTimer.ElapsedMilliseconds;
         }
 
-        //==========================================================================================
-        private void OnDestroy()
-        {
-            SaveValidatorStates();
-        }
+        private void OnDestroy() => SaveValidatorStates();
 
-        #region === CONTROL METHODS ================================================================
+#region [CONTROL METHODS]
 
-        //==========================================================================================
         private static void ControlSpecialFolders()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
-            var specialFolders = m_rules._specialFolders;
+            var specialFolders = _rules._specialFolders;
             var specialFoldersLength = specialFolders.Count;
 
             for (var i = 0; i < specialFoldersLength; i++)
@@ -258,8 +251,8 @@ namespace TossValidator
                 var folderName = splitFolderPath[splitFolderPath.Length - 1];
                 var folderPath = GetPath(splitFolderPath);
 
-                SetErrorData(m_icon._errorSpecialFolder,
-                    ErrorType.SpecialFolderNotExists,
+                SetErrorData(_icon.errorSpecialFolder,
+                    SpecialFolderNotExists,
                     AssetType.Folder,
                     folderName,
                     folderPath,
@@ -267,20 +260,19 @@ namespace TossValidator
             }
         }
 
-        //==========================================================================================
         private static void ControlFolders()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             var appPath = Application.dataPath;
-            var indexPatternOfNaming = m_rules._patternFolders;
+            var indexPatternOfNaming = _rules._patternFolders;
             var patternOfNaming = GetPatternOfNaming(indexPatternOfNaming, AssetType.Folder);
             var regexPatternOfNaming = new Regex(patternOfNaming);
             var folders = Directory.GetDirectories(appPath, "*", SearchOption.AllDirectories);
 
-            #region === CONTROL NAMING =============================================================
+#region [CONTROL NAMING]
 
             for (var i = 0; i < folders.Length; i++)
             {
@@ -295,23 +287,22 @@ namespace TossValidator
 
                 var folderPath = GetPath(splitFolderPath);
 
-                SetErrorData(m_icon._errorWrongName,
-                    ErrorType.FolderNameError,
+                SetErrorData(_icon.errorWrongName,
+                    FolderNameError,
                     AssetType.Folder,
                     folderName,
                     folderPath,
                     NamingPatterns[indexPatternOfNaming]);
             }
 
-            #endregion
+#endregion
         }
 
-        //==========================================================================================
         private static void ControlPrefabs()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_PREFAB = "t:Prefab";
 
@@ -321,20 +312,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Prefab,
                 FILTER_PREFAB,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.PrefabLocationError,
-                ErrorType.PrefabNameError);
+                PrefabLocationError,
+                PrefabNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlScripts()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_SCRIPT = "t:Script";
 
@@ -344,20 +334,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Script,
                 FILTER_SCRIPT,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.ScriptLocationError,
-                ErrorType.ScriptNameError);
+                ScriptLocationError,
+                ScriptNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlTextures()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_TEXTURE = "t:Texture";
 
@@ -367,20 +356,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Texture,
                 FILTER_TEXTURE,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.TextureLocationError,
-                ErrorType.TextureNameError);
+                TextureLocationError,
+                TextureNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlScenes()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_SCENE = "t:Scene";
 
@@ -390,20 +378,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Scene,
                 FILTER_SCENE,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.SceneLocationError,
-                ErrorType.SceneNameError);
+                SceneLocationError,
+                SceneNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlSounds()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_AUDIO_CLIP = "t:AudioClip";
 
@@ -413,20 +400,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Sound,
                 FILTER_AUDIO_CLIP,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.SoundLocationError,
-                ErrorType.SoundNameError);
+                SoundLocationError,
+                SoundNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlModels()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_MODEL = "t:Model";
 
@@ -436,20 +422,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Model,
                 FILTER_MODEL,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.ModelLocationError,
-                ErrorType.ModelNameError);
+                ModelLocationError,
+                ModelNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlMaterials()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_MATERIAL = "t:Material,t:Shader";
 
@@ -459,20 +444,19 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Material,
                 FILTER_MATERIAL,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.MaterialLocationError,
-                ErrorType.MaterialNameError);
+                MaterialLocationError,
+                MaterialNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static void ControlAnimations()
         {
             InitializeValidator();
 
-            if (m_rules == null) return;
+            if (_rules == null) return;
 
             const string FILTER_ANIMATION = "t:AnimationClip,t:AnimatorController";
 
@@ -482,43 +466,42 @@ namespace TossValidator
 
             ControlLocationAndNaming(AssetType.Animation,
                 FILTER_ANIMATION,
-                m_rules,
+                _rules,
                 conditionPaths,
-                ErrorType.AnimationLocationError,
-                ErrorType.AnimationNameError);
+                AnimationLocationError,
+                AnimationNameError);
 
             conditionPaths.Clear();
         }
 
-        //==========================================================================================
         private static List<string> ControlConditions(AssetType assetType,
             string filter,
             int conditionAssetIndex)
         {
             var conditionPaths = new List<string>();
 
-            if (!m_filter._controlConditions) return conditionPaths;
+            if (!_filter.controlConditions) return conditionPaths;
 
             var isAssetTypeInCondition = new bool[12];
 
-            for (var i = 0; i < m_rules._conditionFormula.Count; i++)
+            for (var i = 0; i < _rules._conditionFormula.Count; i++)
             {
                 // Int to Bool array
                 for (var j = 0; j < isAssetTypeInCondition.Length; j++)
                 {
-                    isAssetTypeInCondition[j] = ((m_rules._conditionSelection[i] >> j) & 1) == 1;
+                    isAssetTypeInCondition[j] = ((_rules._conditionSelection[i] >> j) & 1) == 1;
                 }
 
                 if (!isAssetTypeInCondition[conditionAssetIndex]) continue;
 
-                var splitActualCondition = GetSplitCondition(m_rules._conditionFormula[i]);
+                var splitActualCondition = GetSplitCondition(_rules._conditionFormula[i]);
 
                 if (splitActualCondition.Length != 1
                     && splitActualCondition.Length != 2) continue;
 
                 if (splitActualCondition.Length == 2)
                 {
-                    var countSpecialChar = m_rules._conditionFormula[i].Split('*').Length - 1;
+                    var countSpecialChar = _rules._conditionFormula[i].Split('*').Length - 1;
                     if (countSpecialChar > 1) continue;
                 }
 
@@ -535,8 +518,8 @@ namespace TossValidator
 
                         if (guids.Length == 0)
                         {
-                            SetErrorData(m_icon._errorNotContain,
-                                ErrorType.FolderNotContain,
+                            SetErrorData(_icon.errorNotContain,
+                                FolderNotContain,
                                 assetType,
                                 GetMessageMissingAsset(assetType),
                                 pathSectionOne.ModifyPathSeparators(),
@@ -562,8 +545,8 @@ namespace TossValidator
 
                                 if (guids.Length == 0)
                                 {
-                                    SetErrorData(m_icon._errorNotContain,
-                                        ErrorType.FolderNotContain,
+                                    SetErrorData(_icon.errorNotContain,
+                                        FolderNotContain,
                                         assetType,
                                         GetMessageMissingAsset(assetType),
                                         parentFolderPath.ModifyPathSeparators(),
@@ -577,10 +560,10 @@ namespace TossValidator
                             }
                             else
                             {
-                                SetErrorData(m_icon._errorNotValid,
-                                    ErrorType.FolderNotValid,
+                                SetErrorData(_icon.errorNotValid,
+                                    FolderNotValid,
                                     AssetType.Folder,
-                                    GetMessageConditionRow(i, m_rules._conditionFormula[i]),
+                                    GetMessageConditionRow(i, _rules._conditionFormula[i]),
                                     parentFolderPath.ModifyPathSeparators(),
                                     string.Empty);
                             }
@@ -589,10 +572,10 @@ namespace TossValidator
                 }
                 else
                 {
-                    SetErrorData(m_icon._errorNotValid,
-                        ErrorType.FolderNotValid,
+                    SetErrorData(_icon.errorNotValid,
+                        FolderNotValid,
                         AssetType.Folder,
-                        GetMessageConditionRow(i, m_rules._conditionFormula[i]),
+                        GetMessageConditionRow(i, _rules._conditionFormula[i]),
                         pathSectionOne,
                         string.Empty);
                 }
@@ -601,11 +584,10 @@ namespace TossValidator
             return conditionPaths;
         }
 
-        //==========================================================================================
         private static void ControlLocationAndNaming(AssetType assetType,
             string filter,
             DValidatorRules rules,
-            List<string> conditionPaths,
+            IList<string> conditionPaths,
             ErrorType locationError,
             ErrorType nameError)
         {
@@ -689,18 +671,18 @@ namespace TossValidator
 
                 if (!isAssetInMainFolder)
                 {
-                    SetErrorData(m_icon._errorWrongLocation,
+                    SetErrorData(_icon.errorWrongLocation,
                         locationError,
                         assetType,
                         assetName,
                         folderPath,
-                        GetLocationErrorMessage(m_rules._rootFolderTextures));
+                        GetLocationErrorMessage(_rules._rootFolderTextures));
                 }
 
                 //--- Control Name -----------------------------------------------------------------
                 if (regexPatternOfNaming.IsMatch(assetName)) continue;
 
-                SetErrorData(m_icon._errorWrongName,
+                SetErrorData(_icon.errorWrongName,
                     nameError,
                     assetType,
                     assetName,
@@ -711,11 +693,10 @@ namespace TossValidator
             conditionPaths.Clear();
         }
 
-        #endregion
+#endregion
 
-        #region === DRAW METHODS ===================================================================
+#region [DRAW METHODS]
 
-        //==========================================================================================
         [MenuItem("Tools/Toss Validator")]
         private static void UnityMenuTossValidator()
         {
@@ -723,28 +704,26 @@ namespace TossValidator
             DrawMainWindow();
         }
 
-        //==========================================================================================
         private static void DrawMainWindow()
         {
-            m_mainWindow = (TossValidator) GetWindow(typeof(TossValidator));
-            m_mainWindow.minSize = new Vector2(1024, 400);
-            m_mainWindow.titleContent.image = m_icon._editorWindow;
-            m_mainWindow.titleContent.text = "Toss Validator";
-            m_mainWindow.titleContent.tooltip = "Toss Validator for Unity projects";
-            m_mainWindow.Show();
+            _mainWindow = (TossValidator) GetWindow(typeof(TossValidator));
+            _mainWindow.minSize = new Vector2(1024, 400);
+            _mainWindow.titleContent.image = _icon.editorWindow;
+            _mainWindow.titleContent.text = "Toss Validator";
+            _mainWindow.titleContent.tooltip = "Toss Validator for Unity projects";
+            _mainWindow.Show();
         }
 
-        //==========================================================================================
         private static void DrawValidator(float windowWidth)
         {
             GUILayout.Space(50f);
 
-            #region === FILTER PANEL ===============================================================
+#region [FILTER PANEL]
 
-            m_guiValue._styleDynamicMarginLeft.margin.top = 0;
-            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 960) / 2);
+            _guiValue.styleDynamicMarginLeft.margin.top = 0;
+            _guiValue.styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 960) / 2);
 
-            EditorGUILayout.BeginHorizontal(m_guiValue._styleDynamicMarginLeft,
+            EditorGUILayout.BeginHorizontal(_guiValue.styleDynamicMarginLeft,
                 GUILayout.Width(840), GUILayout.Height(40));
 
             EditorGUILayout.BeginHorizontal(EditorStyles.helpBox,
@@ -754,52 +733,52 @@ namespace TossValidator
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginVertical();
-            m_filter._controlSpecialFolders = EditorGUILayout.ToggleLeft("Special Folders",
-                m_filter._controlSpecialFolders,
+            _filter.controlSpecialFolders = EditorGUILayout.ToggleLeft("Special Folders",
+                _filter.controlSpecialFolders,
                 GUILayout.Width(120),
                 GUILayout.Height(20));
 
-            m_filter._controlScenes = EditorGUILayout.ToggleLeft("Scenes",
-                m_filter._controlScenes,
-                GUILayout.Width(120),
-                GUILayout.Height(20));
-            EditorGUILayout.EndVertical();
-
-            //--------------------------------------------------------------------------------------
-            EditorGUILayout.BeginVertical();
-            m_filter._controlFolders = EditorGUILayout.ToggleLeft("All Folders",
-                m_filter._controlFolders,
-                GUILayout.Width(120),
-                GUILayout.Height(20));
-
-            m_filter._controlGraphics3D = EditorGUILayout.ToggleLeft("3D (Models)",
-                m_filter._controlGraphics3D,
+            _filter.controlScenes = EditorGUILayout.ToggleLeft("Scenes",
+                _filter.controlScenes,
                 GUILayout.Width(120),
                 GUILayout.Height(20));
             EditorGUILayout.EndVertical();
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginVertical();
-            m_filter._controlPrefabs = EditorGUILayout.ToggleLeft("Prefabs",
-                m_filter._controlPrefabs,
+            _filter.controlFolders = EditorGUILayout.ToggleLeft("All Folders",
+                _filter.controlFolders,
+                GUILayout.Width(120),
+                GUILayout.Height(20));
+
+            _filter.controlGraphics3D = EditorGUILayout.ToggleLeft("3D (Models)",
+                _filter.controlGraphics3D,
+                GUILayout.Width(120),
+                GUILayout.Height(20));
+            EditorGUILayout.EndVertical();
+
+            //--------------------------------------------------------------------------------------
+            EditorGUILayout.BeginVertical();
+            _filter.controlPrefabs = EditorGUILayout.ToggleLeft("Prefabs",
+                _filter.controlPrefabs,
                 GUILayout.Width(100),
                 GUILayout.Height(20));
 
-            m_filter._controlSounds = EditorGUILayout.ToggleLeft("Sounds",
-                m_filter._controlSounds,
+            _filter.controlSounds = EditorGUILayout.ToggleLeft("Sounds",
+                _filter.controlSounds,
                 GUILayout.Width(100),
                 GUILayout.Height(20));
             EditorGUILayout.EndVertical();
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginVertical();
-            m_filter._controlScripts = EditorGUILayout.ToggleLeft("Scripts",
-                m_filter._controlScripts,
+            _filter.controlScripts = EditorGUILayout.ToggleLeft("Scripts",
+                _filter.controlScripts,
                 GUILayout.Width(100),
                 GUILayout.Height(20));
 
-            m_filter._controlTextures = EditorGUILayout.ToggleLeft("Textures",
-                m_filter._controlTextures,
+            _filter.controlTextures = EditorGUILayout.ToggleLeft("Textures",
+                _filter.controlTextures,
                 GUILayout.Width(100),
                 GUILayout.Height(20));
 
@@ -807,21 +786,21 @@ namespace TossValidator
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginVertical();
-            m_filter._controlMaterials = EditorGUILayout.ToggleLeft("Materials/Shaders",
-                m_filter._controlMaterials,
+            _filter.controlMaterials = EditorGUILayout.ToggleLeft("Materials/Shaders",
+                _filter.controlMaterials,
                 GUILayout.Width(160),
                 GUILayout.Height(20));
 
-            m_filter._controlAnimations = EditorGUILayout.ToggleLeft("Animations/Controllers",
-                m_filter._controlAnimations,
+            _filter.controlAnimations = EditorGUILayout.ToggleLeft("Animations/Controllers",
+                _filter.controlAnimations,
                 GUILayout.Width(160),
                 GUILayout.Height(20));
             EditorGUILayout.EndVertical();
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginVertical();
-            m_filter._controlConditions = EditorGUILayout.ToggleLeft("Conditions",
-                m_filter._controlConditions,
+            _filter.controlConditions = EditorGUILayout.ToggleLeft("Conditions",
+                _filter.controlConditions,
                 GUILayout.Width(120),
                 GUILayout.Height(18));
             EditorGUILayout.EndVertical();
@@ -832,18 +811,18 @@ namespace TossValidator
                 GUILayout.Width(50),
                 GUILayout.Height(18)))
             {
-                m_filter._controlSpecialFolders = true;
-                m_filter._controlFolders = true;
-                m_filter._controlPrefabs = true;
-                m_filter._controlScripts = true;
-                m_filter._controlTextures = true;
-                m_filter._controlScenes = true;
-                m_filter._controlGraphics3D = true;
-                m_filter._controlSounds = true;
-                m_filter._controlMaterials = true;
-                m_filter._controlAnimations = true;
+                _filter.controlSpecialFolders = true;
+                _filter.controlFolders = true;
+                _filter.controlPrefabs = true;
+                _filter.controlScripts = true;
+                _filter.controlTextures = true;
+                _filter.controlScenes = true;
+                _filter.controlGraphics3D = true;
+                _filter.controlSounds = true;
+                _filter.controlMaterials = true;
+                _filter.controlAnimations = true;
 
-                m_filter._controlConditions = true;
+                _filter.controlConditions = true;
             }
 
             // Button None - deselect all
@@ -851,18 +830,18 @@ namespace TossValidator
                 GUILayout.Width(50),
                 GUILayout.Height(19)))
             {
-                m_filter._controlSpecialFolders = false;
-                m_filter._controlFolders = false;
-                m_filter._controlPrefabs = false;
-                m_filter._controlScripts = false;
-                m_filter._controlTextures = false;
-                m_filter._controlScenes = false;
-                m_filter._controlGraphics3D = false;
-                m_filter._controlSounds = false;
-                m_filter._controlMaterials = false;
-                m_filter._controlAnimations = false;
+                _filter.controlSpecialFolders = false;
+                _filter.controlFolders = false;
+                _filter.controlPrefabs = false;
+                _filter.controlScripts = false;
+                _filter.controlTextures = false;
+                _filter.controlScenes = false;
+                _filter.controlGraphics3D = false;
+                _filter.controlSounds = false;
+                _filter.controlMaterials = false;
+                _filter.controlAnimations = false;
 
-                m_filter._controlConditions = false;
+                _filter.controlConditions = false;
             }
 
             EditorGUILayout.EndVertical();
@@ -883,26 +862,26 @@ namespace TossValidator
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndHorizontal();
 
-            #endregion
+#endregion
 
-            #region === MIDDLE PANEL ===============================================================
+#region [MIDDLE PANEL]
 
-            m_guiValue._styleDynamicMarginLeft.margin.top = 0;
-            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 960) / 2);
+            _guiValue.styleDynamicMarginLeft.margin.top = 0;
+            _guiValue.styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 960) / 2);
 
-            EditorGUILayout.BeginHorizontal(m_guiValue._styleDynamicMarginLeft,
+            EditorGUILayout.BeginHorizontal(_guiValue.styleDynamicMarginLeft,
                 GUILayout.Width(960));
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginHorizontal(GUILayout.Width(304));
-            EditorGUILayout.HelpBox("TIME OF CONTROL: " + m_controlTime + " ms",
+            EditorGUILayout.HelpBox("TIME OF CONTROL: " + _controlTime + " ms",
                 MessageType.Info,
                 true);
             EditorGUILayout.EndHorizontal();
 
             //--------------------------------------------------------------------------------------
             EditorGUILayout.BeginHorizontal(GUILayout.Width(340));
-            if (m_countErrors == 0)
+            if (_countErrors == 0)
             {
                 EditorGUILayout.HelpBox("ERRORS IN ASSETS FOLDER: 0",
                     MessageType.Info,
@@ -911,15 +890,15 @@ namespace TossValidator
             else
             {
                 string errorMessage;
-                if (m_countErrors <= m_settings._countDisplayErrors)
+                if (_countErrors <= _settings.countDisplayErrors)
                 {
-                    errorMessage = "ERRORS IN ASSETS FOLDER: " + m_countErrors;
+                    errorMessage = "ERRORS IN ASSETS FOLDER: " + _countErrors;
                     EditorGUILayout.HelpBox(errorMessage, MessageType.Error, true);
                 }
                 else
                 {
                     errorMessage = "ERRORS IN ASSETS FOLDER: ";
-                    errorMessage += m_settings._countDisplayErrors;
+                    errorMessage += _settings.countDisplayErrors;
                     errorMessage += "+";
                     EditorGUILayout.HelpBox(errorMessage, MessageType.Error, true);
                 }
@@ -931,7 +910,7 @@ namespace TossValidator
             EditorGUILayout.BeginHorizontal(EditorStyles.helpBox, GUILayout.Width(304));
             EditorGUI.BeginDisabledGroup(EditorApplication.isCompiling || Errors.Count == 0);
 
-            EditorGUILayout.BeginHorizontal(m_guiValue._styleExportButtonMarginLeft,
+            EditorGUILayout.BeginHorizontal(_guiValue.styleExportButtonMarginLeft,
                 GUILayout.Width(200),
                 GUILayout.Height(26));
 
@@ -953,22 +932,22 @@ namespace TossValidator
 
             GUILayout.Space(20f);
 
-            #endregion
+#endregion
 
-            #region === RESULTS / ROWS =============================================================
+#region [RESULTS / ROWS]
 
             // Horizontal line / Separator
             EditorGUI.DrawRect(new Rect(0, 160, windowWidth, 1), Color.black);
 
-            m_guiValue._scrollPosValidator =
-                EditorGUILayout.BeginScrollView(m_guiValue._scrollPosValidator);
+            _guiValue.scrollPosValidator =
+                EditorGUILayout.BeginScrollView(_guiValue.scrollPosValidator);
 
             if (Errors.Count == 0)
             {
-                m_guiValue._styleDynamicMarginLeft.margin.top = 50;
-                m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 340) / 2);
+                _guiValue.styleDynamicMarginLeft.margin.top = 50;
+                _guiValue.styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 340) / 2);
 
-                EditorGUILayout.BeginHorizontal(m_guiValue._styleDynamicMarginLeft,
+                EditorGUILayout.BeginHorizontal(_guiValue.styleDynamicMarginLeft,
                     GUILayout.Width(340));
 
                 EditorGUILayout.HelpBox(GetWarningMessageAfterCompile(),
@@ -979,9 +958,9 @@ namespace TossValidator
             }
             else
             {
-                var loopLength = m_countErrors <= m_settings._countDisplayErrors
-                    ? m_countErrors
-                    : m_settings._countDisplayErrors;
+                var loopLength = _countErrors <= _settings.countDisplayErrors
+                    ? _countErrors
+                    : _settings.countDisplayErrors;
 
                 for (var i = 0; i < loopLength; i++)
                 {
@@ -991,27 +970,26 @@ namespace TossValidator
 
             EditorGUILayout.EndScrollView();
 
-            #endregion
+#endregion
 
             DrawBottomPanel();
         }
 
-        //==========================================================================================
         private static void DrawRules()
         {
             GUILayout.Space(50f);
 
-            m_guiValue._scrollPosRules =
-                EditorGUILayout.BeginScrollView(m_guiValue._scrollPosRules);
+            _guiValue.scrollPosRules =
+                EditorGUILayout.BeginScrollView(_guiValue.scrollPosRules);
 
-            #region === PATTERNS ===================================================================
+#region [PATTERNS]
 
-            m_guiValue._foldoutPatterns = EditorGUILayout.Foldout(
-                m_guiValue._foldoutPatterns,
-                m_guiValue._titlePatterns,
+            _guiValue.foldoutPatterns = EditorGUILayout.Foldout(
+                _guiValue.foldoutPatterns,
+                _guiValue.titlePatterns,
                 true);
 
-            if (m_guiValue._foldoutPatterns)
+            if (_guiValue.foldoutPatterns)
             {
                 EditorGUILayout.BeginHorizontal();
 
@@ -1019,14 +997,14 @@ namespace TossValidator
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
-                m_rules._patternFolders = EditorGUILayout.Popup(
+                _rules._patternFolders = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Folder),
-                    m_rules._patternFolders,
+                    _rules._patternFolders,
                     NamingPatterns);
 
-                m_rules._patternPrefabs = EditorGUILayout.Popup(
+                _rules._patternPrefabs = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Prefab),
-                    m_rules._patternPrefabs,
+                    _rules._patternPrefabs,
                     NamingPatterns);
 
                 EditorGUILayout.LabelField(GetFormattedLabelAssetType(AssetType.Script),
@@ -1039,19 +1017,19 @@ namespace TossValidator
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
-                m_rules._patternTextures = EditorGUILayout.Popup(
+                _rules._patternTextures = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Texture),
-                    m_rules._patternTextures,
+                    _rules._patternTextures,
                     NamingPatterns);
 
-                m_rules._patternScenes = EditorGUILayout.Popup(
+                _rules._patternScenes = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Scene),
-                    m_rules._patternScenes,
+                    _rules._patternScenes,
                     NamingPatterns);
 
-                m_rules._patternGraphics3D = EditorGUILayout.Popup(
+                _rules._patternGraphics3D = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Model),
-                    m_rules._patternGraphics3D,
+                    _rules._patternGraphics3D,
                     NamingPatterns);
 
                 EditorGUILayout.Space();
@@ -1061,19 +1039,19 @@ namespace TossValidator
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
-                m_rules._patternSounds = EditorGUILayout.Popup(
+                _rules._patternSounds = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Sound),
-                    m_rules._patternSounds,
+                    _rules._patternSounds,
                     NamingPatterns);
 
-                m_rules._patternMaterials = EditorGUILayout.Popup(
+                _rules._patternMaterials = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Material),
-                    m_rules._patternMaterials,
+                    _rules._patternMaterials,
                     NamingPatterns);
 
-                m_rules._patternAnimations = EditorGUILayout.Popup(
+                _rules._patternAnimations = EditorGUILayout.Popup(
                     GetFormattedLabelAssetType(AssetType.Animation),
-                    m_rules._patternAnimations,
+                    _rules._patternAnimations,
                     NamingPatterns);
 
                 EditorGUILayout.Space();
@@ -1082,19 +1060,19 @@ namespace TossValidator
                 EditorGUILayout.EndHorizontal();
             }
 
-            #endregion
+#endregion
 
             GUILayout.Space(20f);
 
-            #region === MAIN ROOT FOLDERS ==========================================================
+#region [MAIN ROOT FOLDERS]
 
-            m_guiValue._foldoutRootFolders = EditorGUILayout.Foldout(
-                m_guiValue._foldoutRootFolders,
-                m_guiValue._titleRootFolders,
+            _guiValue.foldoutRootFolders = EditorGUILayout.Foldout(
+                _guiValue.foldoutRootFolders,
+                _guiValue.titleRootFolders,
                 true,
                 EditorStyles.foldout);
 
-            if (m_guiValue._foldoutRootFolders)
+            if (_guiValue.foldoutRootFolders)
             {
                 EditorGUILayout.BeginHorizontal();
 
@@ -1102,21 +1080,21 @@ namespace TossValidator
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
-                m_rules._rootFolderPrefabs =
+                _rules._rootFolderPrefabs =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Prefab),
-                        m_rules._rootFolderPrefabs);
+                        _rules._rootFolderPrefabs);
 
-                m_rules._rootFolderScripts =
+                _rules._rootFolderScripts =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Script),
-                        m_rules._rootFolderScripts);
+                        _rules._rootFolderScripts);
 
-                m_rules._rootFolderTextures =
+                _rules._rootFolderTextures =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Texture),
-                        m_rules._rootFolderTextures);
+                        _rules._rootFolderTextures);
 
-                m_rules._rootFolderScenes =
+                _rules._rootFolderScenes =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Scene),
-                        m_rules._rootFolderScenes);
+                        _rules._rootFolderScenes);
 
                 EditorGUILayout.LabelField(" ", GetInfoTextRootFolders());
 
@@ -1127,21 +1105,21 @@ namespace TossValidator
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
-                m_rules._rootFolderGraphics3D =
+                _rules._rootFolderGraphics3D =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Model),
-                        m_rules._rootFolderGraphics3D);
+                        _rules._rootFolderGraphics3D);
 
-                m_rules._rootFolderSounds =
+                _rules._rootFolderSounds =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Sound),
-                        m_rules._rootFolderSounds);
+                        _rules._rootFolderSounds);
 
-                m_rules._rootFolderMaterials =
+                _rules._rootFolderMaterials =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Material),
-                        m_rules._rootFolderMaterials);
+                        _rules._rootFolderMaterials);
 
-                m_rules._rootFolderAnimations =
+                _rules._rootFolderAnimations =
                     EditorGUILayout.TextField(GetFormattedLabelAssetType(AssetType.Animation),
-                        m_rules._rootFolderAnimations);
+                        _rules._rootFolderAnimations);
 
                 EditorGUILayout.LabelField(" ", GetInfoTextRootFolders());
 
@@ -1151,47 +1129,47 @@ namespace TossValidator
                 EditorGUILayout.EndHorizontal();
             }
 
-            #endregion
+#endregion
 
             GUILayout.Space(20f);
 
-            #region === SPECIAL FOLDERS ============================================================
+#region [SPECIAL FOLDERS]
 
-            m_guiValue._foldoutSpecialFolders = EditorGUILayout.Foldout(
-                m_guiValue._foldoutSpecialFolders,
-                m_guiValue._titleSpecialFolders,
+            _guiValue.foldoutSpecialFolders = EditorGUILayout.Foldout(
+                _guiValue.foldoutSpecialFolders,
+                _guiValue.titleSpecialFolders,
                 true);
 
-            if (m_guiValue._foldoutSpecialFolders)
+            if (_guiValue.foldoutSpecialFolders)
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
                 // Add button
-                GUI.color = m_guiValue._addButtonColor;
+                GUI.color = _guiValue.addButtonColor;
                 if (GUILayout.Button("Add Special Folder", GUILayout.Height(24)))
                 {
-                    if (m_rules._specialFolders.Count < m_settings._countSpecialFolders)
+                    if (_rules._specialFolders.Count < _settings.countSpecialFolders)
                     {
-                        m_rules._specialFolders.Add(string.Empty);
+                        _rules._specialFolders.Add(string.Empty);
                     }
                 }
 
                 GUI.color = Color.white;
 
                 // List of Special Folders
-                for (var i = 0; i < m_rules._specialFolders.Count; i++)
+                for (var i = 0; i < _rules._specialFolders.Count; i++)
                 {
                     EditorGUILayout.BeginHorizontal();
                     {
-                        m_rules._specialFolders[i] =
-                            EditorGUILayout.TextField(m_guiValue._labelSpecialFolder,
-                                m_rules._specialFolders[i]);
+                        _rules._specialFolders[i] =
+                            EditorGUILayout.TextField(_guiValue.labelSpecialFolder,
+                                _rules._specialFolders[i]);
 
-                        GUI.color = m_guiValue._deleteButtonColor;
+                        GUI.color = _guiValue.deleteButtonColor;
                         if (GUILayout.Button(new GUIContent("X", "Close"), GUILayout.Width(22)))
                         {
-                            m_rules._specialFolders.RemoveAt(i);
+                            _rules._specialFolders.RemoveAt(i);
                         }
 
                         GUI.color = Color.white;
@@ -1205,45 +1183,45 @@ namespace TossValidator
                 EditorGUILayout.EndVertical();
             }
 
-            #endregion
+#endregion
 
             GUILayout.Space(20f);
 
-            #region === IGNORE FOLDERS =============================================================
+#region [IGNORE FOLDERS]
 
-            m_guiValue._foldoutIgnoreFolders = EditorGUILayout.Foldout(
-                m_guiValue._foldoutIgnoreFolders,
-                m_guiValue._titleIgnoreFolders,
+            _guiValue.foldoutIgnoreFolders = EditorGUILayout.Foldout(
+                _guiValue.foldoutIgnoreFolders,
+                _guiValue.titleIgnoreFolders,
                 true);
 
-            if (m_guiValue._foldoutIgnoreFolders)
+            if (_guiValue.foldoutIgnoreFolders)
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.Space();
 
                 // Add button
-                GUI.color = m_guiValue._addButtonColor;
+                GUI.color = _guiValue.addButtonColor;
                 if (GUILayout.Button("Add Ignore Folder", GUILayout.Height(24)))
                 {
-                    if (m_rules._ignoreFolders.Count < m_settings._countIgnoreFolders)
-                        m_rules._ignoreFolders.Add(string.Empty);
+                    if (_rules._ignoreFolders.Count < _settings.countIgnoreFolders)
+                        _rules._ignoreFolders.Add(string.Empty);
                 }
 
                 GUI.color = Color.white;
 
                 // List of ignore folders
-                for (var i = 0; i < m_rules._ignoreFolders.Count; i++)
+                for (var i = 0; i < _rules._ignoreFolders.Count; i++)
                 {
                     EditorGUILayout.BeginHorizontal();
                     {
-                        m_rules._ignoreFolders[i] =
-                            EditorGUILayout.TextField(m_guiValue._labelIgnoreFolder,
-                                m_rules._ignoreFolders[i]);
+                        _rules._ignoreFolders[i] =
+                            EditorGUILayout.TextField(_guiValue.labelIgnoreFolder,
+                                _rules._ignoreFolders[i]);
 
-                        GUI.color = m_guiValue._deleteButtonColor;
+                        GUI.color = _guiValue.deleteButtonColor;
                         if (GUILayout.Button(new GUIContent("X", "Close"), GUILayout.Width(22)))
                         {
-                            m_rules._ignoreFolders.RemoveAt(i);
+                            _rules._ignoreFolders.RemoveAt(i);
                         }
 
                         GUI.color = Color.white;
@@ -1257,16 +1235,15 @@ namespace TossValidator
                 EditorGUILayout.EndVertical();
             }
 
-            #endregion
+#endregion
 
             EditorGUILayout.EndScrollView();
 
             DrawBottomPanel();
 
-            EditorUtility.SetDirty(m_rules);
+            EditorUtility.SetDirty(_rules);
         }
 
-        //==========================================================================================
         private static void DrawConditions()
         {
             GUILayout.Space(50f);
@@ -1275,13 +1252,13 @@ namespace TossValidator
             EditorGUILayout.Space();
 
             // Add button
-            GUI.color = m_guiValue._addButtonColor;
+            GUI.color = _guiValue.addButtonColor;
             if (GUILayout.Button("Add Condition", GUILayout.Height(24)))
             {
-                if (m_rules._conditionFormula.Count < m_settings._countConditionRows)
+                if (_rules._conditionFormula.Count < _settings.countConditionRows)
                 {
-                    m_rules._conditionFormula.Add(string.Empty);
-                    m_rules._conditionSelection.Add(0);
+                    _rules._conditionFormula.Add(string.Empty);
+                    _rules._conditionSelection.Add(0);
                 }
             }
 
@@ -1303,14 +1280,13 @@ namespace TossValidator
             DrawBottomPanel();
         }
 
-        //==========================================================================================
         private static void DrawConditionRow()
         {
-            for (var i = 0; i < m_rules._conditionFormula.Count; i++)
+            for (var i = 0; i < _rules._conditionFormula.Count; i++)
             {
                 EditorGUILayout.BeginHorizontal();
 
-                var countSpecialChar = m_rules._conditionFormula[i].Split('*').Length - 1;
+                var countSpecialChar = _rules._conditionFormula[i].Split('*').Length - 1;
 
                 if (countSpecialChar == 0 || countSpecialChar == 1)
                 {
@@ -1321,67 +1297,67 @@ namespace TossValidator
                     GUI.color = Color.red;
                 }
 
-                m_rules._conditionFormula[i] = EditorGUILayout.TextField(
+                _rules._conditionFormula[i] = EditorGUILayout.TextField(
                     GetFormattedLabelCondition(i),
-                    m_rules._conditionFormula[i]);
+                    _rules._conditionFormula[i]);
                 GUI.color = Color.white;
 
-                m_rules._conditionSelection[i] = EditorGUILayout.MaskField(
-                    m_rules._conditionSelection[i],
+                _rules._conditionSelection[i] = EditorGUILayout.MaskField(
+                    _rules._conditionSelection[i],
                     ConditionsTypes,
                     GUILayout.Width(150));
 
                 //--- Button move row up -----------------------------------------------------------
-                if (GUILayout.Button(m_icon._arrowUp, GUILayout.Width(22)))
+                if (GUILayout.Button(_icon.arrowUp, GUILayout.Width(22)))
                 {
                     if (i != 0)
                     {
-                        var exchangeHelper1 = m_rules._conditionFormula[i];
-                        var exchangeHelper2 = m_rules._conditionSelection[i];
+                        var exchangeHelper1 = _rules._conditionFormula[i];
+                        var exchangeHelper2 = _rules._conditionSelection[i];
 
-                        m_rules._conditionFormula[i] = m_rules._conditionFormula[i - 1];
-                        m_rules._conditionSelection[i] = m_rules._conditionSelection[i - 1];
+                        _rules._conditionFormula[i] = _rules._conditionFormula[i - 1];
+                        _rules._conditionSelection[i] = _rules._conditionSelection[i - 1];
 
-                        m_rules._conditionFormula[i - 1] = exchangeHelper1;
-                        m_rules._conditionSelection[i - 1] = exchangeHelper2;
+                        _rules._conditionFormula[i - 1] = exchangeHelper1;
+                        _rules._conditionSelection[i - 1] = exchangeHelper2;
                     }
                 }
 
                 //--- Button move row down ---------------------------------------------------------
-                if (GUILayout.Button(m_icon._arrowDown, GUILayout.Width(22)))
+                if (GUILayout.Button(_icon.arrowDown, GUILayout.Width(22)))
                 {
-                    if (i != m_rules._conditionFormula.Count - 1)
+                    if (i != _rules._conditionFormula.Count - 1)
                     {
-                        var exchangeHelper1 = m_rules._conditionFormula[i];
-                        var exchangeHelper2 = m_rules._conditionSelection[i];
+                        var exchangeHelper1 = _rules._conditionFormula[i];
+                        var exchangeHelper2 = _rules._conditionSelection[i];
 
-                        m_rules._conditionFormula[i] = m_rules._conditionFormula[i + 1];
-                        m_rules._conditionSelection[i] = m_rules._conditionSelection[i + 1];
+                        _rules._conditionFormula[i] = _rules._conditionFormula[i + 1];
+                        _rules._conditionSelection[i] = _rules._conditionSelection[i + 1];
 
-                        m_rules._conditionFormula[i + 1] = exchangeHelper1;
-                        m_rules._conditionSelection[i + 1] = exchangeHelper2;
+                        _rules._conditionFormula[i + 1] = exchangeHelper1;
+                        _rules._conditionSelection[i + 1] = exchangeHelper2;
                     }
                 }
 
-                GUI.color = m_guiValue._duplicateButtonColor;
+                GUI.color = _guiValue.duplicateButtonColor;
 
                 //--- Button duplicate row ---------------------------------------------------------
                 if (GUILayout.Button(new GUIContent("D", "Duplicate row"), GUILayout.Width(22)))
                 {
-                    if (m_rules._conditionFormula.Count < m_settings._countConditionRows)
+                    if (_rules._conditionFormula.Count < _settings.countConditionRows)
                     {
-                        m_rules._conditionFormula.Insert(i, m_rules._conditionFormula[i]);
-                        m_rules._conditionSelection.Insert(i, m_rules._conditionSelection[i]);
+                        _rules._conditionFormula.Insert(i, _rules._conditionFormula[i]);
+                        _rules._conditionSelection.Insert(i, _rules._conditionSelection[i]);
                     }
                 }
 
-                GUI.color = m_guiValue._deleteButtonColor;
+                GUI.color = _guiValue.deleteButtonColor;
 
                 //--- Button delete row ------------------------------------------------------------
                 if (GUILayout.Button(new GUIContent("X", "Delete row"), GUILayout.Width(22)))
                 {
-                    m_rules._conditionFormula.RemoveAt(i);
-                    m_rules._conditionSelection.RemoveAt(i);
+                    _rules._conditionFormula.RemoveAt(i);
+                    _rules._conditionSelection.RemoveAt(i);
                 }
 
                 GUI.color = Color.white;
@@ -1390,42 +1366,41 @@ namespace TossValidator
             }
         }
 
-        //==========================================================================================
         private static void DrawSettings(float windowWidth)
         {
             GUILayout.Space(50f);
 
-            m_guiValue._styleDynamicMarginLeft.margin.top = 0;
-            m_guiValue._styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 600) / 2);
+            _guiValue.styleDynamicMarginLeft.margin.top = 0;
+            _guiValue.styleDynamicMarginLeft.margin.left = (int) ((windowWidth - 600) / 2);
 
-            EditorGUILayout.BeginHorizontal(m_guiValue._styleDynamicMarginLeft);
+            EditorGUILayout.BeginHorizontal(_guiValue.styleDynamicMarginLeft);
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.MinWidth(600));
             EditorGUILayout.Space();
 
-            m_settings._countDisplayErrors = EditorGUILayout.IntSlider("Count Display Errors:",
-                m_settings._countDisplayErrors,
+            _settings.countDisplayErrors = EditorGUILayout.IntSlider("Count Display Errors:",
+                _settings.countDisplayErrors,
                 10,
                 MAX_COUNT_DISPLAY_ERRORS);
 
             EditorGUILayout.Space();
 
-            m_settings._countSpecialFolders = EditorGUILayout.IntSlider("Count Special Folders:",
-                m_settings._countSpecialFolders,
+            _settings.countSpecialFolders = EditorGUILayout.IntSlider("Count Special Folders:",
+                _settings.countSpecialFolders,
                 10,
                 MAX_COUNT_SPECIAL_FOLDERS);
 
             EditorGUILayout.Space();
 
-            m_settings._countIgnoreFolders = EditorGUILayout.IntSlider("Count Ignore Folders:",
-                m_settings._countIgnoreFolders,
+            _settings.countIgnoreFolders = EditorGUILayout.IntSlider("Count Ignore Folders:",
+                _settings.countIgnoreFolders,
                 10,
                 MAX_COUNT_IGNORE_FOLDERS);
 
             EditorGUILayout.Space();
 
-            m_settings._countConditionRows = EditorGUILayout.IntSlider("Count Condition Rows:",
-                m_settings._countConditionRows,
+            _settings.countConditionRows = EditorGUILayout.IntSlider("Count Condition Rows:",
+                _settings.countConditionRows,
                 10,
                 MAX_COUNT_CONDITION_ROWS);
 
@@ -1445,25 +1420,23 @@ namespace TossValidator
             DrawBottomPanel();
         }
 
-        //==========================================================================================
         private static void DrawRow(int index)
         {
-            var assetName = Errors[index]._assetName;
-            var assetPath = Errors[index]._assetPath;
-            var errorType = Errors[index]._errorType;
-            var errorName = Errors[index]._errorName;
-            var assetType = Errors[index]._assetType;
-            var correctPattern = Errors[index]._correctPattern;
+            var assetName = Errors[index].assetName;
+            var assetPath = Errors[index].assetPath;
+            var errorType = Errors[index].errorType;
+            var errorName = Errors[index].errorName;
+            var assetType = Errors[index].assetType;
+            var correctPattern = Errors[index].correctPattern;
 
-            var rowStyle = index % 2 == 0 ? m_guiValue._styleEvenRow : m_guiValue._styleOddRow;
+            var rowStyle = index % 2 == 0 ? _guiValue.styleEvenRow : _guiValue.styleOddRow;
             EditorGUILayout.BeginHorizontal(rowStyle, GUILayout.Height(50));
 
             EditorGUI.BeginDisabledGroup(EditorApplication.isCompiling);
 
-            if (errorType == ErrorType.SpecialFolderNotExists
-                || errorType == ErrorType.FolderNotValid)
+            if (errorType == SpecialFolderNotExists || errorType == FolderNotValid)
             {
-                GUILayout.Box(Errors[index]._errorIcon,
+                GUILayout.Box(Errors[index].errorIcon,
                     rowStyle,
                     GUILayout.Width(50),
                     GUILayout.Height(50));
@@ -1471,47 +1444,39 @@ namespace TossValidator
             else
             {
                 // Left Row Button
-                if (GUILayout.Button(Errors[index]._errorIcon,
+                if (GUILayout.Button(Errors[index].errorIcon,
                     GUILayout.Width(50),
                     GUILayout.Height(50)))
                 {
                     switch (errorType)
                     {
-                        case ErrorType.FolderNameError:
-                        case ErrorType.PrefabNameError:
-                        case ErrorType.PrefabLocationError:
-                        case ErrorType.ScriptNameError:
-                        case ErrorType.ScriptLocationError:
-                        case ErrorType.TextureNameError:
-                        case ErrorType.TextureLocationError:
-                        case ErrorType.SceneNameError:
-                        case ErrorType.SceneLocationError:
-                        case ErrorType.SoundNameError:
-                        case ErrorType.SoundLocationError:
-                        case ErrorType.ModelNameError:
-                        case ErrorType.ModelLocationError:
-                        case ErrorType.MaterialNameError:
-                        case ErrorType.MaterialLocationError:
-                        case ErrorType.AnimationNameError:
-                        case ErrorType.AnimationLocationError:
-
+                        case FolderNameError:
+                        case PrefabNameError:
+                        case PrefabLocationError:
+                        case ScriptNameError:
+                        case ScriptLocationError:
+                        case TextureNameError:
+                        case TextureLocationError:
+                        case SceneNameError:
+                        case SceneLocationError:
+                        case SoundNameError:
+                        case SoundLocationError:
+                        case ModelNameError:
+                        case ModelLocationError:
+                        case MaterialNameError:
+                        case MaterialLocationError:
+                        case AnimationNameError:
+                        case AnimationLocationError:
+                        {
                             var path = GetFormattedAssetPath(assetPath, assetName);
                             SelectAsset(path);
-
                             break;
-
-                        case ErrorType.FolderNotContain:
-
+                        }
+                        case FolderNotContain:
+                        {
                             SelectAsset(assetPath);
-
                             break;
-
-                        case ErrorType.SpecialFolderNotExists:
-                        case ErrorType.FolderNotValid:
-
-                            // No OnClick Functionality
-
-                            break;
+                        }
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -1541,50 +1506,50 @@ namespace TossValidator
 
             switch (errorType)
             {
-                case ErrorType.SpecialFolderNotExists:
+                case SpecialFolderNotExists:
 
                     EditorGUILayout.HelpBox("Create Folder(s) in the Project Window",
                         MessageType.Info,
                         false);
 
                     break;
-                case ErrorType.FolderNameError:
-                case ErrorType.PrefabNameError:
-                case ErrorType.ScriptNameError:
-                case ErrorType.TextureNameError:
-                case ErrorType.SceneNameError:
-                case ErrorType.SoundNameError:
-                case ErrorType.ModelNameError:
-                case ErrorType.MaterialNameError:
-                case ErrorType.AnimationNameError:
+                case FolderNameError:
+                case PrefabNameError:
+                case ScriptNameError:
+                case TextureNameError:
+                case SceneNameError:
+                case SoundNameError:
+                case ModelNameError:
+                case MaterialNameError:
+                case AnimationNameError:
 
                     EditorGUILayout.HelpBox("Correct: " + correctPattern,
                         MessageType.Info,
                         false);
 
                     break;
-                case ErrorType.PrefabLocationError:
-                case ErrorType.ScriptLocationError:
-                case ErrorType.TextureLocationError:
-                case ErrorType.SceneLocationError:
-                case ErrorType.SoundLocationError:
-                case ErrorType.ModelLocationError:
-                case ErrorType.MaterialLocationError:
-                case ErrorType.AnimationLocationError:
+                case PrefabLocationError:
+                case ScriptLocationError:
+                case TextureLocationError:
+                case SceneLocationError:
+                case SoundLocationError:
+                case ModelLocationError:
+                case MaterialLocationError:
+                case AnimationLocationError:
 
                     EditorGUILayout.HelpBox("Check Root folders or Conditions",
                         MessageType.Info,
                         false);
 
                     break;
-                case ErrorType.FolderNotContain:
+                case FolderNotContain:
 
                     EditorGUILayout.HelpBox(GetHelpBoxText(assetType),
                         MessageType.Info,
                         false);
 
                     break;
-                case ErrorType.FolderNotValid:
+                case FolderNotValid:
 
                     EditorGUILayout.HelpBox("Create Folder(s) in the Project Window",
                         MessageType.Info,
@@ -1598,26 +1563,24 @@ namespace TossValidator
             EditorGUILayout.EndHorizontal();
         }
 
-        //==========================================================================================
         private static void DrawBottomPanel()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             {
-                GUILayout.Label("Created by: Toss");
+                GUILayout.Label("Created by: SkyToss");
                 GUILayout.FlexibleSpace();
                 GUILayout.Label("Version: 1.5");
             }
             EditorGUILayout.EndHorizontal();
         }
 
-        #endregion
+#endregion
 
-        #region === WORK / HELP METHODS ============================================================
+#region [WORK / HELP METHODS]
 
-        //==========================================================================================
         private static void InitializeValidator()
         {
-            if (m_rules != null) return;
+            if (_rules != null) return;
 
             //ConsoleDebugLog("[TOSS VALIDATOR] --> InitializeValidator()");
 
@@ -1626,7 +1589,6 @@ namespace TossValidator
             LoadValidatorStates();
         }
 
-        //==========================================================================================
         private static void InitializeProjectRules()
         {
             var guidValidatorSettings = AssetDatabase.FindAssets("ValidatorSettings");
@@ -1639,26 +1601,23 @@ namespace TossValidator
 
             InitializeIconsAndStyles(pathImages);
 
-            m_rules = (DValidatorRules) AssetDatabase.LoadAssetAtPath(
+            _rules = (DValidatorRules) AssetDatabase.LoadAssetAtPath(
                 pathValidatorSettings,
                 typeof(DValidatorRules));
-
-            //m_rules = (DValidatorRules) EditorGUIUtility.Load(pathValidatorSettings);
         }
 
-        //==========================================================================================
         private static void InitializeIconsAndStyles(string pathImages)
         {
-            m_icon._editorWindow = GetTexture2D(pathImages, "icon-editor-window");
-            m_icon._errorSpecialFolder = GetTexture2D(pathImages, "icon-error-folder-special");
-            m_icon._errorWrongLocation = GetTexture2D(pathImages, "icon-error-wrong-location");
-            m_icon._errorWrongName = GetTexture2D(pathImages, "icon-error-wrong-name");
-            m_icon._errorNotContain = GetTexture2D(pathImages, "icon-error-not-contain");
-            m_icon._errorNotValid = GetTexture2D(pathImages, "icon-error-not-valid");
-            m_icon._arrowUp = GetTexture2D(pathImages, "arrow-up");
-            m_icon._arrowDown = GetTexture2D(pathImages, "arrow-down");
+            _icon.editorWindow = GetTexture2D(pathImages, "icon-editor-window");
+            _icon.errorSpecialFolder = GetTexture2D(pathImages, "icon-error-folder-special");
+            _icon.errorWrongLocation = GetTexture2D(pathImages, "icon-error-wrong-location");
+            _icon.errorWrongName = GetTexture2D(pathImages, "icon-error-wrong-name");
+            _icon.errorNotContain = GetTexture2D(pathImages, "icon-error-not-contain");
+            _icon.errorNotValid = GetTexture2D(pathImages, "icon-error-not-valid");
+            _icon.arrowUp = GetTexture2D(pathImages, "arrow-up");
+            _icon.arrowDown = GetTexture2D(pathImages, "arrow-down");
 
-            var styleEvenRow = m_guiValue._styleEvenRow;
+            var styleEvenRow = _guiValue.styleEvenRow;
 
             styleEvenRow.normal.background = EditorGUIUtility.isProSkin
                 ? GetTexture2D(pathImages, "even-row-bg-dark")
@@ -1666,11 +1625,10 @@ namespace TossValidator
 
             styleEvenRow.padding = new RectOffset(10, 6, 6, 6);
 
-            m_guiValue._styleOddRow.padding = new RectOffset(10, 6, 6, 6);
-            m_guiValue._styleExportButtonMarginLeft.margin.left = 48;
+            _guiValue.styleOddRow.padding = new RectOffset(10, 6, 6, 6);
+            _guiValue.styleExportButtonMarginLeft.margin.left = 48;
         }
 
-        //==========================================================================================
         private static void SaveValidatorStates()
         {
             AssetDatabase.SaveAssets();
@@ -1678,66 +1636,60 @@ namespace TossValidator
             SaveSettings();
         }
 
-        //==========================================================================================
         private static void SaveFilter()
         {
-            EditorPrefs.SetBool("controlSpecialFolders", m_filter._controlSpecialFolders);
-            EditorPrefs.SetBool("controlFolders", m_filter._controlFolders);
-            EditorPrefs.SetBool("controlPrefabs", m_filter._controlPrefabs);
-            EditorPrefs.SetBool("controlScripts", m_filter._controlScripts);
-            EditorPrefs.SetBool("controlTextures", m_filter._controlTextures);
-            EditorPrefs.SetBool("controlScenes", m_filter._controlScenes);
-            EditorPrefs.SetBool("controlGraphics3D", m_filter._controlGraphics3D);
-            EditorPrefs.SetBool("controlSounds", m_filter._controlSounds);
-            EditorPrefs.SetBool("controlMaterials", m_filter._controlMaterials);
-            EditorPrefs.SetBool("controlAnimations", m_filter._controlAnimations);
+            EditorPrefs.SetBool("controlSpecialFolders", _filter.controlSpecialFolders);
+            EditorPrefs.SetBool("controlFolders", _filter.controlFolders);
+            EditorPrefs.SetBool("controlPrefabs", _filter.controlPrefabs);
+            EditorPrefs.SetBool("controlScripts", _filter.controlScripts);
+            EditorPrefs.SetBool("controlTextures", _filter.controlTextures);
+            EditorPrefs.SetBool("controlScenes", _filter.controlScenes);
+            EditorPrefs.SetBool("controlGraphics3D", _filter.controlGraphics3D);
+            EditorPrefs.SetBool("controlSounds", _filter.controlSounds);
+            EditorPrefs.SetBool("controlMaterials", _filter.controlMaterials);
+            EditorPrefs.SetBool("controlAnimations", _filter.controlAnimations);
 
-            EditorPrefs.SetBool("controlConditions", m_filter._controlConditions);
+            EditorPrefs.SetBool("controlConditions", _filter.controlConditions);
         }
 
-        //==========================================================================================
         private static void SaveSettings()
         {
-            EditorPrefs.SetInt("countDisplayErrors", m_settings._countDisplayErrors);
-            EditorPrefs.SetInt("countSpecialFolders", m_settings._countSpecialFolders);
-            EditorPrefs.SetInt("countIgnoreFolders", m_settings._countIgnoreFolders);
-            EditorPrefs.SetInt("countConditionRows", m_settings._countConditionRows);
+            EditorPrefs.SetInt("countDisplayErrors", _settings.countDisplayErrors);
+            EditorPrefs.SetInt("countSpecialFolders", _settings.countSpecialFolders);
+            EditorPrefs.SetInt("countIgnoreFolders", _settings.countIgnoreFolders);
+            EditorPrefs.SetInt("countConditionRows", _settings.countConditionRows);
         }
 
-        //==========================================================================================
         private static void LoadValidatorStates()
         {
             LoadFilter();
             LoadSettings();
         }
 
-        //==========================================================================================
         private static void LoadFilter()
         {
-            m_filter._controlSpecialFolders = EditorPrefs.GetBool("controlSpecialFolders", true);
-            m_filter._controlFolders = EditorPrefs.GetBool("controlFolders", true);
-            m_filter._controlPrefabs = EditorPrefs.GetBool("controlPrefabs", true);
-            m_filter._controlScripts = EditorPrefs.GetBool("controlScripts", true);
-            m_filter._controlTextures = EditorPrefs.GetBool("controlTextures", true);
-            m_filter._controlScenes = EditorPrefs.GetBool("controlScenes", true);
-            m_filter._controlGraphics3D = EditorPrefs.GetBool("controlGraphics3D", true);
-            m_filter._controlSounds = EditorPrefs.GetBool("controlSounds", true);
-            m_filter._controlMaterials = EditorPrefs.GetBool("controlMaterials", true);
-            m_filter._controlAnimations = EditorPrefs.GetBool("controlAnimations", true);
+            _filter.controlSpecialFolders = EditorPrefs.GetBool("controlSpecialFolders", true);
+            _filter.controlFolders = EditorPrefs.GetBool("controlFolders", true);
+            _filter.controlPrefabs = EditorPrefs.GetBool("controlPrefabs", true);
+            _filter.controlScripts = EditorPrefs.GetBool("controlScripts", true);
+            _filter.controlTextures = EditorPrefs.GetBool("controlTextures", true);
+            _filter.controlScenes = EditorPrefs.GetBool("controlScenes", true);
+            _filter.controlGraphics3D = EditorPrefs.GetBool("controlGraphics3D", true);
+            _filter.controlSounds = EditorPrefs.GetBool("controlSounds", true);
+            _filter.controlMaterials = EditorPrefs.GetBool("controlMaterials", true);
+            _filter.controlAnimations = EditorPrefs.GetBool("controlAnimations", true);
 
-            m_filter._controlConditions = EditorPrefs.GetBool("controlConditions", true);
+            _filter.controlConditions = EditorPrefs.GetBool("controlConditions", true);
         }
 
-        //==========================================================================================
         private static void LoadSettings()
         {
-            m_settings._countDisplayErrors = EditorPrefs.GetInt("countDisplayErrors", 40);
-            m_settings._countSpecialFolders = EditorPrefs.GetInt("countSpecialFolders", 10);
-            m_settings._countIgnoreFolders = EditorPrefs.GetInt("countIgnoreFolders", 10);
-            m_settings._countConditionRows = EditorPrefs.GetInt("countConditionRows", 10);
+            _settings.countDisplayErrors = EditorPrefs.GetInt("countDisplayErrors", 40);
+            _settings.countSpecialFolders = EditorPrefs.GetInt("countSpecialFolders", 10);
+            _settings.countIgnoreFolders = EditorPrefs.GetInt("countIgnoreFolders", 10);
+            _settings.countConditionRows = EditorPrefs.GetInt("countConditionRows", 10);
         }
 
-        //==========================================================================================
         private static void ExportErrorsToFile()
         {
             if (Errors.Count == 0) return;
@@ -1758,13 +1710,13 @@ namespace TossValidator
 
                     for (var i = 0; i < countErrors; i++)
                     {
-                        sb.Append(Errors[i]._errorName);
+                        sb.Append(Errors[i].errorName);
                         sb.Append(FILE_SEPARATOR);
-                        sb.Append(Errors[i]._assetType);
+                        sb.Append(Errors[i].assetType);
                         sb.Append(FILE_SEPARATOR);
-                        sb.Append(Errors[i]._assetName);
+                        sb.Append(Errors[i].assetName);
                         sb.Append(FILE_SEPARATOR);
-                        sb.Append(Errors[i]._assetPath);
+                        sb.Append(Errors[i].assetPath);
 
                         file.WriteLine(sb);
 
@@ -1789,7 +1741,6 @@ namespace TossValidator
             }
         }
 
-        //==========================================================================================
         private static void SetErrorData(Texture2D errorIcon,
             ErrorType errorType,
             AssetType assetType,
@@ -1799,7 +1750,7 @@ namespace TossValidator
         {
             if (!IsPossibilityDisplayErrors()) return;
 
-            m_countErrors++;
+            _countErrors++;
 
             var errorName = GetErrorName(errorType);
 
@@ -1812,27 +1763,23 @@ namespace TossValidator
                 example));
         }
 
-        //==========================================================================================
         private static bool IsPossibilityDisplayErrors()
         {
-            return m_countErrors <= m_settings._countDisplayErrors;
+            return _countErrors <= _settings.countDisplayErrors;
         }
 
-        //==========================================================================================
         private static void ResetErrorData()
         {
-            m_countErrors = 0;
+            _countErrors = 0;
             Errors.Clear();
         }
 
-        //==========================================================================================
         private static void SelectAsset(string assetPath)
         {
             var assetObject = AssetDatabase.LoadAssetAtPath(assetPath, typeof(UnityEngine.Object));
             Selection.activeObject = assetObject;
         }
 
-        //==========================================================================================
         private static string GetLocationErrorMessage(string nameRootFolder)
         {
             var sb = new StringBuilder();
@@ -1842,7 +1789,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetPath(string[] slicePath)
         {
             var sb = new StringBuilder();
@@ -1864,56 +1810,53 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetErrorName(ErrorType errorType)
         {
             switch (errorType)
             {
-                case ErrorType.FolderNameError:
-                case ErrorType.ScriptNameError:
-                case ErrorType.PrefabNameError:
-                case ErrorType.SceneNameError:
-                case ErrorType.TextureNameError:
-                case ErrorType.SoundNameError:
-                case ErrorType.ModelNameError:
-                case ErrorType.MaterialNameError:
-                case ErrorType.AnimationNameError:
+                case FolderNameError:
+                case ScriptNameError:
+                case PrefabNameError:
+                case SceneNameError:
+                case TextureNameError:
+                case SoundNameError:
+                case ModelNameError:
+                case MaterialNameError:
+                case AnimationNameError:
                     return "WRONG NAME";
-                case ErrorType.PrefabLocationError:
-                case ErrorType.ScriptLocationError:
-                case ErrorType.SceneLocationError:
-                case ErrorType.TextureLocationError:
-                case ErrorType.SoundLocationError:
-                case ErrorType.ModelLocationError:
-                case ErrorType.MaterialLocationError:
-                case ErrorType.AnimationLocationError:
+                case PrefabLocationError:
+                case ScriptLocationError:
+                case SceneLocationError:
+                case TextureLocationError:
+                case SoundLocationError:
+                case ModelLocationError:
+                case MaterialLocationError:
+                case AnimationLocationError:
                     return "WRONG LOCATION";
-                case ErrorType.SpecialFolderNotExists:
+                case SpecialFolderNotExists:
                     return "NOT EXISTS";
-                case ErrorType.FolderNotContain:
+                case FolderNotContain:
                     return "NOT CONTAIN";
-                case ErrorType.FolderNotValid:
+                case FolderNotValid:
                     return "NOT VALID";
                 default:
                     return "ERROR";
             }
         }
 
-        //==========================================================================================
         private static bool IsInIgnoreFolder(string[] input)
         {
-            for (var i = 0; i < m_rules._ignoreFolders.Count; i++)
+            for (var i = 0; i < _rules._ignoreFolders.Count; i++)
             {
-                if (m_rules._ignoreFolders[i].Length == 0) continue;
+                if (_rules._ignoreFolders[i].Length == 0) continue;
 
-                if (Array.IndexOf(input, m_rules._ignoreFolders[i]) > -1)
+                if (Array.IndexOf(input, _rules._ignoreFolders[i]) > -1)
                     return true;
             }
 
             return false;
         }
 
-        //==========================================================================================
         private static string GetPatternOfNaming(int indexPattern, AssetType assetType)
         {
             var sb = new StringBuilder();
@@ -1969,7 +1912,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetCompleteAssetPath(string actualPath)
         {
             var sb = new StringBuilder();
@@ -1979,7 +1921,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetMessageMissingAsset(AssetType assetType)
         {
             var sb = new StringBuilder();
@@ -1989,7 +1930,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetMessageConditionRow(int conditionRowIndex, string formula)
         {
             var sb = new StringBuilder();
@@ -2001,7 +1941,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetFormattedLabelAssetType(AssetType assetType)
         {
             var sb = new StringBuilder();
@@ -2020,7 +1959,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetFormattedLabel(string label)
         {
             var sb = new StringBuilder();
@@ -2029,7 +1967,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetFormattedLabelCondition(int rowIndex)
         {
             var sb = new StringBuilder();
@@ -2040,7 +1977,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetFormattedAssetPath(string assetPath, string assetName)
         {
             var sb = new StringBuilder();
@@ -2050,7 +1986,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetWarningMessageAfterCompile()
         {
             var sb = new StringBuilder();
@@ -2066,19 +2001,16 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================      
         private static string[] GetSplitAssetPath(string assetPath)
         {
             return assetPath.Split(new[] {"\\", "/"}, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        //==========================================================================================
         private static string[] GetSplitCondition(string condition)
         {
             return condition.Split(new[] {"\\*\\", "\\*"}, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        //==========================================================================================
         private static string GetParentFolderPath(string[] splitCondition, string pathSubFolder)
         {
             var sb = new StringBuilder();
@@ -2091,7 +2023,6 @@ namespace TossValidator
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetHelpBoxText(AssetType assetType)
         {
             switch (assetType)
@@ -2119,46 +2050,41 @@ namespace TossValidator
             }
         }
 
-        //==========================================================================================
         private static string GetInfoTextRootFolders()
         {
             return "[Separator: | (OR)]";
         }
 
-        //==========================================================================================
         private static string GetInfoTextSpecialFolders()
         {
             var sb = new StringBuilder();
             sb.Append("[Separator: \\] [Max. count: ");
-            sb.Append(m_settings._countSpecialFolders);
+            sb.Append(_settings.countSpecialFolders);
             sb.Append("] [Special Folder = folder that the project must contain");
             sb.Append(" (example: Documentation, Controllers, etc.)]");
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetInfoTextIgnoreFolders()
         {
             var sb = new StringBuilder();
             sb.Append("[Max. count: ");
-            sb.Append(m_settings._countIgnoreFolders);
+            sb.Append(_settings.countIgnoreFolders);
             sb.Append("]");
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static string GetInfoTextConditions()
         {
             var sb = new StringBuilder();
             sb.Append("[All subfolders symbol: * (One per condition)] ");
             sb.Append("[Separator: \\] ");
             sb.Append("[Max. count: ");
-            sb.Append(m_settings._countConditionRows);
+            sb.Append(_settings.countConditionRows);
             sb.Append("]");
             return sb.ToString();
         }
 
-        //==========================================================================================
         private static Texture2D GetTexture2D(string texturePath, string textureName)
         {
             var sb = new StringBuilder();
@@ -2169,49 +2095,47 @@ namespace TossValidator
             return (Texture2D) EditorGUIUtility.Load(sb.ToString());
         }
 
-        //==========================================================================================
         private static void ControlActualStatesCompareToSettings()
         {
-            if (m_rules._specialFolders.Count > m_settings._countSpecialFolders)
+            if (_rules._specialFolders.Count > _settings.countSpecialFolders)
             {
-                m_rules._specialFolders.RemoveRange(
-                    m_settings._countSpecialFolders,
-                    m_rules._specialFolders.Count - m_settings._countSpecialFolders);
+                _rules._specialFolders.RemoveRange(
+                    _settings.countSpecialFolders,
+                    _rules._specialFolders.Count - _settings.countSpecialFolders);
             }
 
-            if (m_rules._ignoreFolders.Count > m_settings._countIgnoreFolders)
+            if (_rules._ignoreFolders.Count > _settings.countIgnoreFolders)
             {
-                m_rules._ignoreFolders.RemoveRange(
-                    m_settings._countIgnoreFolders,
-                    m_rules._ignoreFolders.Count - m_settings._countIgnoreFolders);
+                _rules._ignoreFolders.RemoveRange(
+                    _settings.countIgnoreFolders,
+                    _rules._ignoreFolders.Count - _settings.countIgnoreFolders);
             }
 
-            if (m_rules._conditionFormula.Count > m_settings._countConditionRows)
+            if (_rules._conditionFormula.Count > _settings.countConditionRows)
             {
-                m_rules._conditionFormula.RemoveRange(
-                    m_settings._countConditionRows,
-                    m_rules._conditionFormula.Count - m_settings._countConditionRows);
+                _rules._conditionFormula.RemoveRange(
+                    _settings.countConditionRows,
+                    _rules._conditionFormula.Count - _settings.countConditionRows);
 
-                m_rules._conditionSelection.RemoveRange(
-                    m_settings._countConditionRows,
-                    m_rules._conditionSelection.Count - m_settings._countConditionRows);
+                _rules._conditionSelection.RemoveRange(
+                    _settings.countConditionRows,
+                    _rules._conditionSelection.Count - _settings.countConditionRows);
             }
         }
 
-        #endregion
+#endregion
 
-        #region === STRUCTS ========================================================================
+#region [STRUCTS]
 
-        //==========================================================================================
-        private struct Error
+        private readonly struct Error
         {
-            public readonly Texture2D _errorIcon;
-            public readonly ErrorType _errorType;
-            public readonly AssetType _assetType;
-            public readonly string _errorName;
-            public readonly string _assetName;
-            public readonly string _assetPath;
-            public readonly string _correctPattern;
+            public readonly Texture2D errorIcon;
+            public readonly ErrorType errorType;
+            public readonly AssetType assetType;
+            public readonly string errorName;
+            public readonly string assetName;
+            public readonly string assetPath;
+            public readonly string correctPattern;
 
             public Error(Texture2D errorIcon,
                 ErrorType errorType,
@@ -2221,88 +2145,83 @@ namespace TossValidator
                 string assetPath,
                 string correctPattern)
             {
-                _errorIcon = errorIcon;
-                _errorType = errorType;
-                _assetType = assetType;
-                _errorName = errorName;
-                _assetName = assetName;
-                _assetPath = assetPath;
-                _correctPattern = correctPattern;
+                this.errorIcon = errorIcon;
+                this.errorType = errorType;
+                this.assetType = assetType;
+                this.errorName = errorName;
+                this.assetName = assetName;
+                this.assetPath = assetPath;
+                this.correctPattern = correctPattern;
             }
         }
 
-        //==========================================================================================
         private struct Filter
         {
-            public bool _controlSpecialFolders;
-            public bool _controlFolders;
-            public bool _controlPrefabs;
-            public bool _controlScripts;
-            public bool _controlTextures;
-            public bool _controlScenes;
-            public bool _controlGraphics3D;
-            public bool _controlSounds;
-            public bool _controlMaterials;
-            public bool _controlAnimations;
-            public bool _controlConditions;
+            public bool controlSpecialFolders;
+            public bool controlFolders;
+            public bool controlPrefabs;
+            public bool controlScripts;
+            public bool controlTextures;
+            public bool controlScenes;
+            public bool controlGraphics3D;
+            public bool controlSounds;
+            public bool controlMaterials;
+            public bool controlAnimations;
+            public bool controlConditions;
         }
 
-        //==========================================================================================
         private struct Icon
         {
-            public Texture2D _editorWindow;
-            public Texture2D _errorSpecialFolder;
-            public Texture2D _errorWrongLocation;
-            public Texture2D _errorWrongName;
-            public Texture2D _errorNotContain;
-            public Texture2D _errorNotValid;
-            public Texture2D _arrowUp;
-            public Texture2D _arrowDown;
+            public Texture2D editorWindow;
+            public Texture2D errorSpecialFolder;
+            public Texture2D errorWrongLocation;
+            public Texture2D errorWrongName;
+            public Texture2D errorNotContain;
+            public Texture2D errorNotValid;
+            public Texture2D arrowUp;
+            public Texture2D arrowDown;
         }
 
-        //==========================================================================================
         private struct GuiValue
         {
-            public float _editorActualWidth;
-            public int _indexToolbarSelected;
+            public float editorActualWidth;
+            public int indexToolbarSelected;
 
-            public bool _foldoutPatterns;
-            public string _titlePatterns;
-            public bool _foldoutRootFolders;
-            public string _titleRootFolders;
-            public bool _foldoutSpecialFolders;
-            public string _titleSpecialFolders;
-            public bool _foldoutIgnoreFolders;
-            public string _titleIgnoreFolders;
+            public bool foldoutPatterns;
+            public string titlePatterns;
+            public bool foldoutRootFolders;
+            public string titleRootFolders;
+            public bool foldoutSpecialFolders;
+            public string titleSpecialFolders;
+            public bool foldoutIgnoreFolders;
+            public string titleIgnoreFolders;
 
-            public string _labelSpecialFolder;
-            public string _labelIgnoreFolder;
+            public string labelSpecialFolder;
+            public string labelIgnoreFolder;
 
-            public GUIStyle _styleEvenRow;
-            public GUIStyle _styleOddRow;
-            public GUIStyle _styleDynamicMarginLeft;
-            public GUIStyle _styleExportButtonMarginLeft;
+            public GUIStyle styleEvenRow;
+            public GUIStyle styleOddRow;
+            public GUIStyle styleDynamicMarginLeft;
+            public GUIStyle styleExportButtonMarginLeft;
 
-            public Vector2 _scrollPosValidator;
-            public Vector2 _scrollPosRules;
+            public Vector2 scrollPosValidator;
+            public Vector2 scrollPosRules;
 
-            public Color _addButtonColor;
-            public Color _deleteButtonColor;
-            public Color _duplicateButtonColor;
+            public Color addButtonColor;
+            public Color deleteButtonColor;
+            public Color duplicateButtonColor;
         }
 
-        //==========================================================================================
         private struct Settings
         {
-            public int _countDisplayErrors;
-            public int _countSpecialFolders;
-            public int _countIgnoreFolders;
-            public int _countConditionRows;
+            public int countDisplayErrors;
+            public int countSpecialFolders;
+            public int countIgnoreFolders;
+            public int countConditionRows;
         }
 
-        #endregion
+#endregion
 
-        //==========================================================================================
         private static void ConsoleDebugLog(string message)
         {
             var sb = new StringBuilder();
@@ -2327,7 +2246,6 @@ namespace TossValidator
             UnityEngine.Debug.LogError(sb);
         }
 
-        //==========================================================================================
         public enum ErrorType
         {
             FolderNameError,
@@ -2352,7 +2270,6 @@ namespace TossValidator
             AnimationLocationError
         }
 
-        //==========================================================================================
         public enum AssetType
         {
             Folder,
@@ -2367,31 +2284,27 @@ namespace TossValidator
         }
     }
 
-    //==============================================================================================
     /// <summary>
     ///     EXTENSIONS
     /// </summary>
     public static class TossValidatorExtensions
     {
-        //==========================================================================================
         public static string ModifyPathSeparators(this string input)
         {
             return input.Replace('/', '\\');
         }
 
-        //==========================================================================================
         public static string[] SplitRootFolders(this string input)
         {
             return input.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        //==========================================================================================
         public static string AddSuffixMissingFolders(this string input,
             TossValidator.AssetType assetType,
             TossValidator.ErrorType errorType)
         {
             if (assetType == TossValidator.AssetType.Folder
-                && errorType == TossValidator.ErrorType.FolderNotContain)
+                && errorType == FolderNotContain)
             {
                 return input + "\\ [Missing Folder(s)]";
             }

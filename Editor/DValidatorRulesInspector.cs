@@ -1,5 +1,5 @@
 ﻿// =================================================================================================
-//     Author:			Tomas "Toss" Szilagyi
+//     Author:			Tomas "SkyToss" Szilagyi
 //     Date created:	05.04.2018
 // =================================================================================================
 
@@ -11,9 +11,9 @@ namespace TossValidator
     [CustomEditor(typeof(DValidatorRules))]
     public class DValidatorRulesInspector : Editor
     {
-        private DValidatorRules m_src;
+        private DValidatorRules _src;
 
-        private readonly string[] m_patternsTypes =
+        private readonly string[] _patternsTypes =
         {
             "ExampleOfNaming",
             "exampleOfNaming",
@@ -22,82 +22,80 @@ namespace TossValidator
             "Example_Of_Naming"
         };
 
-        //==========================================================================================
         private void OnEnable()
         {
-            m_src = (DValidatorRules) target;
+            _src = (DValidatorRules) target;
         }
 
-        //==========================================================================================
         public override void OnInspectorGUI()
         {
             GUI.enabled = false;
 
             EditorGUILayout.LabelField("PATTERN OF NAMING", EditorStyles.boldLabel);
-            m_src._patternFolders =
-                EditorGUILayout.Popup("Folders:", m_src._patternFolders, m_patternsTypes);
-            m_src._patternPrefabs =
-                EditorGUILayout.Popup("Prefabs:", m_src._patternPrefabs, m_patternsTypes);
-            m_src._patternScripts =
-                EditorGUILayout.Popup("Scripts:", m_src._patternScripts, m_patternsTypes);
-            m_src._patternTextures =
-                EditorGUILayout.Popup("Textures:", m_src._patternTextures, m_patternsTypes);
-            m_src._patternScenes =
-                EditorGUILayout.Popup("Scenes:", m_src._patternScenes, m_patternsTypes);
-            m_src._patternGraphics3D =
-                EditorGUILayout.Popup("Graphics 3D:", m_src._patternGraphics3D, m_patternsTypes);
-            m_src._patternSounds =
-                EditorGUILayout.Popup("Sounds:", m_src._patternSounds, m_patternsTypes);
-            m_src._patternMaterials =
-                EditorGUILayout.Popup("Materials:", m_src._patternMaterials, m_patternsTypes);
-            m_src._patternAnimations =
-                EditorGUILayout.Popup("Animations:", m_src._patternAnimations, m_patternsTypes);
+            _src._patternFolders =
+                EditorGUILayout.Popup("Folders:", _src._patternFolders, _patternsTypes);
+            _src._patternPrefabs =
+                EditorGUILayout.Popup("Prefabs:", _src._patternPrefabs, _patternsTypes);
+            _src._patternScripts =
+                EditorGUILayout.Popup("Scripts:", _src._patternScripts, _patternsTypes);
+            _src._patternTextures =
+                EditorGUILayout.Popup("Textures:", _src._patternTextures, _patternsTypes);
+            _src._patternScenes =
+                EditorGUILayout.Popup("Scenes:", _src._patternScenes, _patternsTypes);
+            _src._patternGraphics3D =
+                EditorGUILayout.Popup("Graphics 3D:", _src._patternGraphics3D, _patternsTypes);
+            _src._patternSounds =
+                EditorGUILayout.Popup("Sounds:", _src._patternSounds, _patternsTypes);
+            _src._patternMaterials =
+                EditorGUILayout.Popup("Materials:", _src._patternMaterials, _patternsTypes);
+            _src._patternAnimations =
+                EditorGUILayout.Popup("Animations:", _src._patternAnimations, _patternsTypes);
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("ROOT FOLDERS", EditorStyles.boldLabel);
-            m_src._rootFolderPrefabs =
-                EditorGUILayout.TextField("Prefabs:", m_src._rootFolderPrefabs);
-            m_src._rootFolderScripts =
-                EditorGUILayout.TextField("Scripts:", m_src._rootFolderScripts);
-            m_src._rootFolderTextures =
-                EditorGUILayout.TextField("Textures:", m_src._rootFolderTextures);
-            m_src._rootFolderScenes =
-                EditorGUILayout.TextField("Scenes:", m_src._rootFolderScenes);
-            m_src._rootFolderGraphics3D =
-                EditorGUILayout.TextField("Graphics 3D:", m_src._rootFolderGraphics3D);
-            m_src._rootFolderSounds =
-                EditorGUILayout.TextField("Sounds:", m_src._rootFolderSounds);
-            m_src._rootFolderMaterials =
-                EditorGUILayout.TextField("Materials:", m_src._rootFolderMaterials);
-            m_src._rootFolderAnimations =
-                EditorGUILayout.TextField("Animations:", m_src._rootFolderAnimations);
+            _src._rootFolderPrefabs =
+                EditorGUILayout.TextField("Prefabs:", _src._rootFolderPrefabs);
+            _src._rootFolderScripts =
+                EditorGUILayout.TextField("Scripts:", _src._rootFolderScripts);
+            _src._rootFolderTextures =
+                EditorGUILayout.TextField("Textures:", _src._rootFolderTextures);
+            _src._rootFolderScenes =
+                EditorGUILayout.TextField("Scenes:", _src._rootFolderScenes);
+            _src._rootFolderGraphics3D =
+                EditorGUILayout.TextField("Graphics 3D:", _src._rootFolderGraphics3D);
+            _src._rootFolderSounds =
+                EditorGUILayout.TextField("Sounds:", _src._rootFolderSounds);
+            _src._rootFolderMaterials =
+                EditorGUILayout.TextField("Materials:", _src._rootFolderMaterials);
+            _src._rootFolderAnimations =
+                EditorGUILayout.TextField("Animations:", _src._rootFolderAnimations);
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("SPECIAL FOLDERS", EditorStyles.boldLabel);
-            for (var i = 0; i < m_src._specialFolders.Count; i++)
+            for (var i = 0; i < _src._specialFolders.Count; i++)
             {
-                EditorGUILayout.TextField("Folder name:", m_src._specialFolders[i]);
+                EditorGUILayout.TextField("Folder name:", _src._specialFolders[i]);
             }
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("IGNORE FOLDERS", EditorStyles.boldLabel);
-            for (var i = 0; i < m_src._ignoreFolders.Count; i++)
+            for (var i = 0; i < _src._ignoreFolders.Count; i++)
             {
-                EditorGUILayout.TextField("Folder name:", m_src._ignoreFolders[i]);
+                EditorGUILayout.TextField("Folder name:", _src._ignoreFolders[i]);
             }
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("CONDITIONS", EditorStyles.boldLabel);
-            for (var i = 0; i < m_src._conditionFormula.Count; i++)
+            for (var i = 0; i < _src._conditionFormula.Count; i++)
             {
-                m_src._conditionFormula[i] = EditorGUILayout.TextField("Name:",
-                    m_src._conditionFormula[i]);
-                m_src._conditionSelection[i] = EditorGUILayout.IntField("Selection:",
-                    m_src._conditionSelection[i]);
+                _src._conditionFormula[i] = EditorGUILayout.TextField("Name:",
+                    _src._conditionFormula[i]);
+                _src._conditionSelection[i] = EditorGUILayout.IntField("Selection:",
+                    _src._conditionSelection[i]);
                 EditorGUILayout.Space();
             }
 
@@ -105,7 +103,7 @@ namespace TossValidator
 
             EditorGUILayout.Space();
 
-            EditorUtility.SetDirty(m_src);
+            EditorUtility.SetDirty(_src);
         }
     }
 }

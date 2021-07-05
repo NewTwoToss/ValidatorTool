@@ -10,7 +10,7 @@ namespace Tests
     [TestFixture]
     public class TossValidatorTests
     {
-        #region === 1 - ExampleOfNaming ===
+#region === 1 - ExampleOfNaming ===
 
         [Test]
         [TestCase("UnityProjectAssetName")]
@@ -39,9 +39,9 @@ namespace Tests
             Assert.That(inputAssetName, Does.Not.Match(regularExpression));
         }
 
-        #endregion
+#endregion
 
-        #region === 2 - exampleOfNaming ===
+#region === 2 - exampleOfNaming ===
 
         [Test]
         [TestCase("unityProjectAssetName")]
@@ -68,9 +68,9 @@ namespace Tests
             Assert.That(inputAssetName, Does.Not.Match(regularExpression));
         }
 
-        #endregion
+#endregion
 
-        #region === 3 - example_of_naming ===
+#region === 3 - example_of_naming ===
 
         [Test]
         [TestCase("unity_project_asset_name")]
@@ -98,9 +98,9 @@ namespace Tests
             Assert.That(inputAssetName, Does.Not.Match(regularExpression));
         }
 
-        #endregion
+#endregion
 
-        #region === 4 - example-of-naming ===
+#region === 4 - example-of-naming ===
 
         [Test]
         [TestCase("unity-project-asset-name")]
@@ -127,9 +127,9 @@ namespace Tests
             Assert.That(inputAssetName, Does.Not.Match(regularExpression));
         }
 
-        #endregion
+#endregion
 
-        #region === 5 - Example_Of_Naming ===
+#region === 5 - Example_Of_Naming ===
 
         [Test]
         [TestCase("Unity_Project_Asset_Name")]
@@ -161,9 +161,8 @@ namespace Tests
             Assert.That(inputAssetName, Does.Not.Match(regularExpression));
         }
 
-        #endregion
+#endregion
 
-        //==========================================================================================
         [Test]
         [TestCase(".png")]
         [TestCase(".jpg")]
