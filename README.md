@@ -1,4 +1,4 @@
-# Validator Tool
+# Validator Tool 123
 A simple tool for controlling assets in Unity projects. The main goal is to ensure better organization and at the same time define the rules in the project. The validator checks the correct naming and placement of assets. The following types of assets are checked:
 
 - Folders
