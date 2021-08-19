@@ -1,7 +1,7 @@
 # Validator Tool
 A simple tool for controlling assets in Unity projects. The main goal is to ensure better organization and at the same time define the rules in the project. The validator checks the correct naming and placement of assets. 
 
-:heavy_check_mark: <b>The following types of assets are checked:</b>
+:white_check_mark: <b>The following types of assets are checked:</b>
 - Folders
 - Prefabs
 - Scripts
@@ -30,9 +30,9 @@ A simple tool for controlling assets in Unity projects. The main goal is to ensu
 
 
 ## :file_folder: Root Folders
-I need to have individual assets in this folder or folders. Assets can also be found in subdirectories.
+A folder or folders in which assets of a specific type must be placed. Assets can be placed in subdirectories. Exceptions are assets that are listed in the Conditions.
 
-<i>Example</i>: The root folder for textures is named MyTextures. All textures must be in this folder. Exceptions are textures that are listed in the Conditions.
+<i>Example</i>: The root folder for textures is named Textures. All textures must be in this folder. Exceptions are textures that are listed in the Conditions.
 
 ## :file_folder: Special Folders
 Specific folders that are defined according to the needs of the project and that the project must contain.
@@ -52,4 +52,7 @@ These folders and their contents are ignored by the validator during scanning. P
 ## :clipboard: Project Conditions
 Using conditions it is possible to define the location of assets that are related or belong to a common group.
 
-<i>Example</i>: GameContent \ Units \ * \ Prefabs - all folders in the Units folder must contain the Prefabs folder, which must contain at least one asset, in this case prefab.
+<i>Example</i>: GameContent\Units\*\ Prefabs - all folders in the Units folder must contain the Prefabs folder, which must contain at least one asset, in this case prefab.
+
+## Basic Layout
+![Validator Basic Layout](http://dev.unobex.eu/images/ValidatorBasicLayout.png)
