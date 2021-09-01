@@ -696,7 +696,7 @@ namespace TossValidator
 
 #region [DRAW METHODS]
 
-        [MenuItem("Tools/Validator")]
+        [MenuItem("Tools/SkyToss/Validator")]
         private static void UnityMenuTossValidator()
         {
             InitializeValidator();
