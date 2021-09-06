@@ -709,7 +709,7 @@ namespace TossValidator
             _mainWindow.minSize = new Vector2(1024, 400);
             _mainWindow.titleContent.image = _icon.editorWindow;
             _mainWindow.titleContent.text = "Validator";
-            _mainWindow.titleContent.tooltip = "Tool for controlling assets";
+            _mainWindow.titleContent.tooltip = "Tool for Controlling Assets";
             _mainWindow.Show();
         }
 
